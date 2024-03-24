@@ -4,6 +4,7 @@
 -   [] Add github actions to run unit tests etc.
 -   [] Review godoc and improve where needed
     -   [] Idiomatic docs.
+-   [] Add the addlicense check I use in go-collection.
 
 ## Done
 
