@@ -6,6 +6,10 @@
     -   [] Idiomatic docs.
 -   [] Add the addlicense check I use in go-collection.
 
+## Maybe
+
+//AJ### TODO: Create a generic Range type, maybe also add versions for half open etc.
+
 ## Done
 
 -   [x] Add a CONTRIBUTING.md. Need to make a template one for small repos like this.
