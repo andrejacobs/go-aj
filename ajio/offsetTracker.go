@@ -1,0 +1,211 @@
+package ajio
+
+import (
+	"io"
+	"os"
+)
+
+// Keep track of the offset within a io.Reader source
+type OffsetTrackedReader interface {
+	io.Reader
+
+	// Return the current offset
+	Offset() int64
+}
+
+//AJ### TODO: Create a similar Writer as above and then look at condensing this OffsetTracker below to use the other interfaces
+
+// OffsetTracker keeps track of the current offset within file like objects without requiring to make calls to Seek
+type OffsetTracker interface {
+	io.Reader
+	io.Writer
+	io.Seeker
+
+	io.ReaderAt
+	io.WriterAt
+
+	// Return the current offset
+	Offset() int64
+
+	// Ensure the current offset matches the underlying source. In the case of a file like object this should involve a call to Seek.
+	SyncOffset() error
+}
+
+// MultiByteOffsetTrackedReader is the same as OffsetTrackedReader but with the io.ByteReader added
+type MultiByteOffsetTrackedReader interface {
+	OffsetTrackedReader
+	io.ByteReader
+}
+
+//^^ this is so fucking stupid just to get a way to do ReadByte for varint
+
+//-----------------------------------------------------------------------------
+
+type reader struct {
+	rd     io.Reader
+	offset int64
+}
+
+// Create a new OffsetTrackedReader that will keep track of the offset within the source io.ReadSeeker object.
+func NewOffsetTrackedReader(rd io.Reader, baseOffset int64) OffsetTrackedReader {
+	t := &reader{
+		rd:     rd,
+		offset: int64(baseOffset),
+	}
+	return t
+}
+
+// Reader implementation
+func (t *reader) Read(p []byte) (int, error) {
+	n, err := t.rd.Read(p)
+	if err != nil {
+		return n, err
+	}
+
+	t.offset += int64(n)
+
+	return n, nil
+}
+
+// OffsetTrackedReader implementation
+func (t *reader) Offset() int64 {
+	return t.offset
+}
+
+//-----------------------------------------------------------------------------
+
+// Wrap os.File to keep track of the current offset without needing to make constant calls to Seek which involves syscall Lseek
+type fileOffsetTracker struct {
+	f      *os.File
+	offset int64
+}
+
+// Create a new OffsetTracker that will keep track of the file's offset.
+// NOTE: An initital Seek will be called on the file to establish the current offset.
+func NewFileOffsetTracker(f *os.File) (OffsetTracker, error) {
+	t := &fileOffsetTracker{
+		f: f,
+	}
+
+	if err := t.SyncOffset(); err != nil {
+		return nil, err
+	}
+
+	return t, nil
+}
+
+// Reader implementation
+func (t *fileOffsetTracker) Read(p []byte) (int, error) {
+	n, err := t.f.Read(p)
+	if err != nil {
+		return n, err
+	}
+
+	t.offset += int64(n)
+
+	return n, nil
+}
+
+// Writer implementation
+func (t *fileOffsetTracker) Write(p []byte) (int, error) {
+	n, err := t.f.Write(p)
+	if err != nil {
+		return n, err
+	}
+
+	t.offset += int64(n)
+
+	return n, nil
+}
+
+// Seeker implementation
+func (t *fileOffsetTracker) Seek(offset int64, whence int) (int64, error) {
+	newOffset, err := t.f.Seek(offset, whence)
+	if err != nil {
+		return newOffset, err
+	}
+	t.offset = newOffset
+	return newOffset, err
+}
+
+// ReaderAt implementation
+func (t *fileOffsetTracker) ReadAt(p []byte, off int64) (int, error) {
+	n, err := t.f.ReadAt(p, off)
+	if err != nil {
+		return n, err
+	}
+
+	t.offset = off + int64(n)
+
+	return n, nil
+}
+
+// WriterAt implementation
+func (t *fileOffsetTracker) WriteAt(p []byte, off int64) (int, error) {
+	n, err := t.f.WriteAt(p, off)
+	if err != nil {
+		return n, err
+	}
+
+	t.offset = off + int64(n)
+
+	return n, nil
+}
+
+//-----------------------------------------------------------------------------
+
+// OffsetTracker implementation
+func (t *fileOffsetTracker) Offset() int64 {
+	return t.offset
+}
+
+// Ensure the tracker's offset and the file's actual offsets are the same.
+// This will make a call to file.Seek
+func (t *fileOffsetTracker) SyncOffset() error {
+	offset, err := t.f.Seek(0, io.SeekCurrent)
+	if err != nil {
+		return err
+	}
+
+	t.offset = offset
+	return nil
+}
+
+//-----------------------------------------------------------------------------
+
+type wrappedMBReader struct {
+	rd     MultiByteReader
+	offset int64
+}
+
+// Create a new bufio.Reader that also supports being able to do io.Seeker
+func NewMultiByteOffsetTrackedReader(rd MultiByteReader, baseOffset int64) MultiByteOffsetTrackedReader {
+	return &wrappedMBReader{
+		rd:     rd,
+		offset: baseOffset,
+	}
+}
+
+func (w *wrappedMBReader) Read(p []byte) (int, error) {
+	n, err := w.rd.Read(p)
+	if err != nil {
+		return n, err
+	}
+
+	w.offset += int64(n)
+
+	return n, nil
+}
+
+func (w *wrappedMBReader) ReadByte() (byte, error) {
+	b, err := w.rd.ReadByte()
+	if err != nil {
+		return b, err
+	}
+	w.offset++
+	return b, nil
+}
+
+func (w *wrappedMBReader) Offset() int64 {
+	return w.offset
+}
