@@ -5,10 +5,6 @@ import (
 	"io"
 )
 
-// Provide wrappers and various utilities to support existing std lib packages
-// Meaning sometimes you run into use cases where you wanted method A on an interface
-// and for some reason not obvious to you, it is missing in the std lib packages
-
 // Need to be able to do io.Reader.Read but also io.ByteReader.ReadByte and guess
 // what os.File doesn't support reading just a single byte.
 // bufio.NewReader implements this interface.
