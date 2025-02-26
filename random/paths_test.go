@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andrejacobs/go-micropkg/file"
 	"github.com/andrejacobs/go-micropkg/random"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,7 +63,7 @@ func TestCreateFiles(t *testing.T) {
 	require.NoError(t, err)
 	assert.LessOrEqual(t, wc, maxTotalSize)
 
-	// totalSize, _, err := fileutils.CalculateDirSizeShallow(tempDir)
-	// require.NoError(t, err)
-	// assert.LessOrEqual(t, uint64(totalSize), maxTotalSize)
+	totalSize, _, err := file.CalculateDirSizeShallow(tempDir)
+	require.NoError(t, err)
+	assert.LessOrEqual(t, uint64(totalSize), maxTotalSize)
 }

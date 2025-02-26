@@ -1,5 +1,7 @@
 # TODO
 
+-   [] Rename OffsetTracked to maybe TrackedOffset, makes more sense
+
 -   [] Review all the code before being happy to publish a v0.1.0
 -   [] Add github actions to run unit tests etc.
 -   [] Review godoc and improve where needed

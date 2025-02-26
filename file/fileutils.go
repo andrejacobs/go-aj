@@ -1,0 +1,117 @@
+// file provide simple utilities for working with the file system
+package file
+
+import (
+	"errors"
+	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
+)
+
+// Check if the path exists
+// If the path exists then (true, nil) is returned
+// If the path does not exist then (false, nil) is returned
+// If an error occurred while trying to check if the path exists then (false, err) is returned
+func Exists(path string) (bool, error) {
+	if _, err := os.Stat(path); err == nil {
+		return true, nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else {
+		return false, err
+	}
+}
+
+//AJ### TODO: Does this even make sense? if I said DirExist, but a file exists then surely it should stop me from trying to create it
+
+// Check if the path exists and is a directory
+// If the path does not exists then (false, nil) will be returned
+// If the path exists but is not a directory then (false, nil) will be returned
+// An error is only returned if an error occurred while checking if the path exists
+func DirExists(path string) (bool, error) {
+	if info, err := os.Stat(path); err == nil {
+		return info.IsDir(), nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else {
+		return false, err
+	}
+}
+
+// Check if the path exists and is a file
+// If the path does not exists then (false, nil) will be returned
+// If the path exists but is not a file then (false, nil) will be returned
+// An error is only returned if an error occurred while checking if the path exists
+func FileExists(path string) (bool, error) {
+	if info, err := os.Stat(path); err == nil {
+		return !info.IsDir(), nil
+	} else if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else {
+		return false, err
+	}
+}
+
+// Recursively find all files in dir that matches the specified extension.
+// NOTE: ext must include the dot (period) e.g.  .txt
+func GlobExt(dir string, ext string) ([]string, error) {
+	files := []string{}
+	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if filepath.Ext(path) == ext {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	return files, err
+}
+
+// Convert the slice of paths to the absolute paths and optionally verify the paths exists.
+func AbsPaths(paths []string, checkExists bool) ([]string, error) {
+	absPaths := []string{}
+	for _, p := range paths {
+		absPath, err := filepath.Abs(p)
+		if err != nil {
+			return nil, fmt.Errorf("failed to find the absolute path for %q. error: %v", p, err)
+		}
+		absPaths = append(absPaths, absPath)
+	}
+
+	// Ensure paths exist
+	if checkExists {
+		for _, p := range absPaths {
+			exists, err := Exists(p)
+			if err != nil {
+				return nil, fmt.Errorf("invalid path %q. error: %v", p, err)
+			}
+			if !exists {
+				return nil, fmt.Errorf("the path %q does not exist", p)
+			}
+		}
+	}
+
+	return absPaths, nil
+}
+
+// Replace the path's file extension with a new one
+func ReplaceExt(path string, newExt string) string {
+	ext := filepath.Ext(path)
+	if len(ext) < 1 {
+		return path + newExt
+	}
+
+	withoutExt := path[:len(path)-len(ext)]
+	return withoutExt + newExt
+}
+
+// Delete the path if it exists and only return an error if something went wrong other
+// than the fact that the path didn't exist
+func RemoveIfExists(path string) error {
+	if err := os.Remove(path); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
+	return nil
+}
