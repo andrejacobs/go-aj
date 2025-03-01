@@ -3,7 +3,7 @@ package human_test
 import (
 	"testing"
 
-	"github.com/andrejacobs/go-micropkg/human"
+	"github.com/andrejacobs/go-aj/human"
 )
 
 func TestBytes(t *testing.T) {

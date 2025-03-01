@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/andrejacobs/go-micropkg/file/contextio"
+	"github.com/andrejacobs/go-aj/file/contextio"
 )
 
 func TestWriter(t *testing.T) {

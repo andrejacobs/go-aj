@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/andrejacobs/go-micropkg/file"
-	"github.com/andrejacobs/go-micropkg/random"
+	"github.com/andrejacobs/go-aj/file"
+	"github.com/andrejacobs/go-aj/random"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

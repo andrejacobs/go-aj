@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/andrejacobs/go-micropkg/stats"
+	"github.com/andrejacobs/go-aj/stats"
 	"github.com/stretchr/testify/assert"
 )
 

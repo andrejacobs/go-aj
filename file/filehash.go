@@ -13,7 +13,7 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/andrejacobs/go-micropkg/file/contextio"
+	"github.com/andrejacobs/go-aj/file/contextio"
 )
 
 // Do buffered reads from rd and write to the hasher and optional io.Writer.

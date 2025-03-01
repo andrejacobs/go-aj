@@ -1,6 +1,6 @@
-# Contributing to go-micropkg
+# Contributing to go-aj
 
-Thank you so much for contributing to go-micropkg. I appreciate your time and help.
+Thank you so much for contributing to go-aj. I appreciate your time and help.
 Here are some guidelines to help you get started.
 
 ## Code of Conduct
@@ -10,7 +10,7 @@ others who are seeking help. Harassment of any kind will not be tolerated.
 
 ## Questions
 
-If you have questions regarding go-micropkg, feel free to ask it by raising an Issue and label it as a `question`.
+If you have questions regarding go-aj, feel free to ask it by raising an Issue and label it as a `question`.
 
 ## Filing a bug or feature request
 
@@ -18,7 +18,7 @@ If you have questions regarding go-micropkg, feel free to ask it by raising an I
    similar one was already opened. If there is one already opened, feel free
    to comment on it.
 1. If you believe you've found a bug, please provide detailed steps of
-   reproduction, the version of go-micropkg and anything else you believe will be
+   reproduction, the version of go-aj and anything else you believe will be
    useful to help troubleshoot it (e.g. OS environment, environment variables,
    etc...). Also state the current behavior vs. the expected behavior.
 1. If you'd like to see a feature or an enhancement please open an issue with
@@ -37,7 +37,7 @@ If you have questions regarding go-micropkg, feel free to ask it by raising an I
 ### Quick steps to contribute
 
 1. Fork the project.
-1. Download your fork to your computer (`git clone https://github.com/your_username/go-micropkg && cd go-micropkg`)
+1. Download your fork to your computer (`git clone https://github.com/your_username/go-aj && cd go-aj`)
 1. Create your feature branch (`git checkout -b my-new-feature`)
 1. Make changes and run tests (`make test`)
 1. Add them to staging (`git add .`)

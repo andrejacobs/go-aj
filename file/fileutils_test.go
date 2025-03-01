@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/andrejacobs/go-micropkg/file"
+	"github.com/andrejacobs/go-aj/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

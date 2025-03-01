@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/andrejacobs/go-micropkg/ajio"
+	"github.com/andrejacobs/go-aj/ajio"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

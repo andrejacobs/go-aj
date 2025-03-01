@@ -7,4 +7,4 @@ versioninfo:
 	$(eval GIT_COMMIT_HASH := $(shell git rev-parse HEAD))
 	$(eval GIT_TAG := $(shell git describe --tags --dirty --always))
 
-	$(eval GO_LDFLAGS := -s -w -X github.com/andrejacobs/go-micropkg/buildinfo.AppName=example -X github.com/andrejacobs/go-micropkg/buildinfo.Version=${GIT_TAG} -X github.com/andrejacobs/go-micropkg/buildinfo.GitCommitHash=${GIT_COMMIT_HASH})
+	$(eval GO_LDFLAGS := -s -w -X github.com/andrejacobs/go-aj/buildinfo.AppName=example -X github.com/andrejacobs/go-aj/buildinfo.Version=${GIT_TAG} -X github.com/andrejacobs/go-aj/buildinfo.GitCommitHash=${GIT_COMMIT_HASH})

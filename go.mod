@@ -1,4 +1,4 @@
-module github.com/andrejacobs/go-micropkg
+module github.com/andrejacobs/go-aj
 
 go 1.24.0
 

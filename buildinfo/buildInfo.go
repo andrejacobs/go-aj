@@ -1,6 +1,6 @@
 // Package buildinfo is used to include build time information into a compiled app.
 //
-// Please see github.com/andrejacobs/go-micropkg/examples/buildinfo/Makefile on how to use GO_LDFLAGS
+// Please see github.com/andrejacobs/go-aj/examples/buildinfo/Makefile on how to use GO_LDFLAGS
 // to set the information at compile time.
 package buildinfo
 

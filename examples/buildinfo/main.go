@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/andrejacobs/go-micropkg/buildinfo"
+	"github.com/andrejacobs/go-aj/buildinfo"
 )
 
 func main() {

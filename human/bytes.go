@@ -1,6 +1,6 @@
 package human
 
-// I want to minimize 3rd party dependencies on my own go-micropkg packages
+// I want to minimize 3rd party dependencies on my own go-aj packages
 // and I use the following functions from Dustin Sallings great go-humanize package.
 // So I decided to copy the functions from https://github.com/dustin/go-humanize/blob/master/bytes.go
 

@@ -5,7 +5,7 @@ import (
 	"io"
 	"runtime"
 
-	"github.com/andrejacobs/go-micropkg/human"
+	"github.com/andrejacobs/go-aj/human"
 )
 
 // Get the memory usage stats
