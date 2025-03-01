@@ -116,7 +116,7 @@ func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, er
 		panic("unsupported parameter type")
 	}
 	if err != nil {
-		return 0, fmt.Errorf("failed to write string's length. %v", err)
+		return 0, fmt.Errorf("failed to write string's length. %w", err)
 	}
 
 	n, err := io.WriteString(w, data) // more efficient if we know upfront it is a string. This avoids allocs
@@ -129,7 +129,7 @@ func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, er
 func (v *VariableDataFixedLen[S]) ReadString(r io.Reader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to read a string. %v", err)
+		return "", 0, fmt.Errorf("failed to read a string. %w", err)
 	}
 
 	return string(data), rcount, err
@@ -189,7 +189,7 @@ func (v *VariableData) Read(r MultiByteReader, buffer []byte) ([]byte, int, erro
 
 	n, err := io.ReadFull(r, buffer)
 	if err != nil {
-		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %v", dataLen, err)
+		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %w", dataLen, err)
 	}
 
 	return buffer, n + varintSize, nil
@@ -217,7 +217,7 @@ func (v *VariableData) WriteString(w io.Writer, data string) (int, error) {
 func (v *VariableData) ReadString(r MultiByteReader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {
-		return "", 0, fmt.Errorf("failed to read a string. %v", err)
+		return "", 0, fmt.Errorf("failed to read a string. %w", err)
 	}
 
 	return string(data), rcount, err
@@ -298,7 +298,7 @@ func writeUint64(w io.Writer, data []byte, count int, order binary.ByteOrder) (i
 func readUint8(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int, error) {
 	var count uint8
 	if err := binary.Read(r, order, &count); err != nil {
-		return nil, 0, fmt.Errorf("failed to read the size of the data. %v", err)
+		return nil, 0, fmt.Errorf("failed to read the size of the data. %w", err)
 	}
 
 	if cap(buffer) < int(count) {
@@ -309,7 +309,7 @@ func readUint8(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int,
 
 	n, err := io.ReadFull(r, buffer)
 	if err != nil {
-		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %v", count, err)
+		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %w", count, err)
 	}
 
 	return buffer, n + 1, nil
@@ -318,7 +318,7 @@ func readUint8(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int,
 func readUint16(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int, error) {
 	var count uint16
 	if err := binary.Read(r, order, &count); err != nil {
-		return nil, 0, fmt.Errorf("failed to read the size of the data. %v", err)
+		return nil, 0, fmt.Errorf("failed to read the size of the data. %w", err)
 	}
 
 	if cap(buffer) < int(count) {
@@ -329,7 +329,7 @@ func readUint16(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int
 
 	n, err := io.ReadFull(r, buffer)
 	if err != nil {
-		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %v", count, err)
+		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %w", count, err)
 	}
 
 	return buffer, n + 2, nil
@@ -338,7 +338,7 @@ func readUint16(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int
 func readUint32(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int, error) {
 	var count uint32
 	if err := binary.Read(r, order, &count); err != nil {
-		return nil, 0, fmt.Errorf("failed to read the size of the data. %v", err)
+		return nil, 0, fmt.Errorf("failed to read the size of the data. %w", err)
 	}
 
 	if cap(buffer) < int(count) {
@@ -349,7 +349,7 @@ func readUint32(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int
 
 	n, err := io.ReadFull(r, buffer)
 	if err != nil {
-		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %v", count, err)
+		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %w", count, err)
 	}
 
 	return buffer, n + 4, nil
@@ -358,7 +358,7 @@ func readUint32(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int
 func readUint64(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int, error) {
 	var count uint64
 	if err := binary.Read(r, order, &count); err != nil {
-		return nil, 0, fmt.Errorf("failed to read the size of the data. %v", err)
+		return nil, 0, fmt.Errorf("failed to read the size of the data. %w", err)
 	}
 
 	if cap(buffer) < int(count) {
@@ -369,7 +369,7 @@ func readUint64(r io.Reader, buffer []byte, order binary.ByteOrder) ([]byte, int
 
 	n, err := io.ReadFull(r, buffer)
 	if err != nil {
-		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %v", count, err)
+		return nil, n, fmt.Errorf("failed to read the expected size %d of data. %w", count, err)
 	}
 
 	return buffer, n + 8, nil

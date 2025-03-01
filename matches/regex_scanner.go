@@ -28,7 +28,7 @@ type RegexScannerResult map[string][]string
 func (r *RegexScanner) Add(key string, expression string, foundFn RegexScannerFoundMatches) error {
 	regex, err := regexp.Compile(expression)
 	if err != nil {
-		return fmt.Errorf("failed to compile the regular expression for the key: %q expression: %q. %v", key, expression, err)
+		return fmt.Errorf("failed to compile the regular expression for the key: %q expression: %q. %w", key, expression, err)
 	}
 
 	if r.entries == nil {

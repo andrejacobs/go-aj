@@ -41,7 +41,7 @@ func HashFromReader(ctx context.Context, rd io.Reader, hasher hash.Hash, w io.Wr
 func Hash(ctx context.Context, path string, hasher hash.Hash, w io.Writer) ([]byte, uint64, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to hash the file '%s'. %v", path, err)
+		return nil, 0, fmt.Errorf("failed to hash the file '%s'. %w", path, err)
 	}
 	defer f.Close()
 

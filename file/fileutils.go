@@ -73,7 +73,7 @@ func AbsPaths(paths []string, checkExists bool) ([]string, error) {
 	for _, p := range paths {
 		absPath, err := filepath.Abs(p)
 		if err != nil {
-			return nil, fmt.Errorf("failed to find the absolute path for %q. error: %v", p, err)
+			return nil, fmt.Errorf("failed to find the absolute path for %q. error: %w", p, err)
 		}
 		absPaths = append(absPaths, absPath)
 	}
@@ -83,7 +83,7 @@ func AbsPaths(paths []string, checkExists bool) ([]string, error) {
 		for _, p := range absPaths {
 			exists, err := Exists(p)
 			if err != nil {
-				return nil, fmt.Errorf("invalid path %q. error: %v", p, err)
+				return nil, fmt.Errorf("invalid path %q. error: %w", p, err)
 			}
 			if !exists {
 				return nil, fmt.Errorf("the path %q does not exist", p)

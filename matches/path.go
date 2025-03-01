@@ -23,7 +23,7 @@ type RegexPathMatcher struct {
 func NewRegexPathMatcher(expressions []string) (*RegexPathMatcher, error) {
 	regexList, err := NewRegexList(expressions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create the RegexPathMatcher. %v", err)
+		return nil, fmt.Errorf("failed to create the RegexPathMatcher. %w", err)
 	}
 
 	matcher := RegexPathMatcher{
