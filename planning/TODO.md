@@ -1,6 +1,7 @@
 # TODO
 
 -   [] Rename OffsetTracked to maybe TrackedOffset, makes more sense
+-   [] Check we wrap errors correctly with %w and not %v
 
 -   [] Review all the code before being happy to publish a v0.1.0
 -   [] Add github actions to run unit tests etc.
