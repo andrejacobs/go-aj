@@ -50,6 +50,7 @@ check-lint:
 	go vet ./...
 ifneq (${CI}, true)
 	golangci-lint run
+	addlicense -check -c "Andre Jacobs" -l mit -ignore '.github/**' -ignore 'build/**' ./
 endif
 
 # Check code quality
@@ -57,7 +58,7 @@ endif
 check: check-formatting check-lint
 
 #------------------------------------------------------------------------------
-# Go miscellaneous
+# Miscellaneous
 #------------------------------------------------------------------------------
 
 # Fetch required go modules
@@ -69,3 +70,9 @@ go-deps:
 .PHONY: go-tidy
 go-tidy:
 	go mod tidy
+
+# Add the copyright and license notice
+.PHONY: addlic
+addlic:
+	@echo "Adding copyright and license notice"
+	addlicense -v -c "Andre Jacobs" -l mit -ignore '.github/**' -ignore 'build/**' ./

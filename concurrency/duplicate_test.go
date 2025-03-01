@@ -155,7 +155,6 @@ func TestFanoutDifferentRates(t *testing.T) {
 			time.Sleep(time.Millisecond)
 		}
 		close(producer)
-		// fmt.Printf("AJ### Producer is finished\n")
 	}()
 
 	// Duplicate the producer to output to multiple channels
