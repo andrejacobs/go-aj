@@ -22,9 +22,13 @@
 
 linters:
     enable:
-        # - gosec
+        - gosec
         - godot
         - misspell
         - stylecheck
+linters-settings:
+    gosec:
+        excludes:
+            - G115 # Potential integer overflow when converting between integer types
 run:
     tests: false

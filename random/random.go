@@ -67,7 +67,7 @@ func String(n int) string {
 
 // Int returns a random integer between the minimum and maximum.
 func Int(min int, max int) int {
-	return rand.Intn(max-min+1) + min
+	return rand.Intn(max-min+1) + min // #nosec G404 -- Not used for crypto
 }
 
 // Read 4 bytes from the secure random number generator and convert it to an uint32.

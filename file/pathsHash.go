@@ -33,7 +33,7 @@ type PathHash [PathHashSize]byte
 
 // Calculate the unique hash for a path.
 func CalculatePathHash(path string) PathHash {
-	return sha1.Sum([]byte(path))
+	return sha1.Sum([]byte(path)) // #nosec G401 -- Not used for crypto
 }
 
 // Calculate the unique hash for a given slice of file paths.
@@ -52,5 +52,5 @@ func CalculatePathsHash(paths []string) (PathHash, error) {
 		}
 	}
 
-	return sha1.Sum(buf.Bytes()), nil
+	return sha1.Sum(buf.Bytes()), nil // #nosec G401 -- Not used for crypto
 }

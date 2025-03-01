@@ -124,13 +124,13 @@ func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, er
 	dt := any(v.maxValue)
 	switch dt.(type) {
 	case uint8:
-		err = binary.Write(w, v.order, uint8(dataLen)) // #nosec G115 -- Overflow is checked above
+		err = binary.Write(w, v.order, uint8(dataLen))
 	case uint16:
-		err = binary.Write(w, v.order, uint16(dataLen)) // #nosec G115 -- Overflow is checked above
+		err = binary.Write(w, v.order, uint16(dataLen))
 	case uint32:
-		err = binary.Write(w, v.order, uint32(dataLen)) // #nosec G115 -- Overflow is checked above
+		err = binary.Write(w, v.order, uint32(dataLen))
 	case uint64:
-		err = binary.Write(w, v.order, uint64(dataLen)) // #nosec G115 -- Overflow is checked above
+		err = binary.Write(w, v.order, uint64(dataLen))
 	default:
 		panic("unsupported parameter type")
 	}
