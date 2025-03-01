@@ -22,7 +22,9 @@
 
 linters:
     enable:
-        - gosec
+        # - gosec
         - godot
         - misspell
         - stylecheck
+run:
+    tests: false

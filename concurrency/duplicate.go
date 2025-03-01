@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-// Consume from the 'in' channel and produce the same value to all of the output channels
+// Consume from the 'in' channel and produce the same value to all of the output channels.
 func Fanout[T any](ctx context.Context, in <-chan T, outs ...chan T) {
 loop:
 	for {
@@ -26,8 +26,8 @@ loop:
 	}
 }
 
-// Consume from the 'in' channel and produce the a transformed value to the output channels
-// Meaning consume T and produce V
+// Consume from the 'in' channel and produce the a transformed value to the output channels.
+// Meaning consume T and produce V.
 func TransformedFanout[T any, V any](ctx context.Context,
 	transformer func(in T) V,
 	in <-chan T, outs ...chan V) {

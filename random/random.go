@@ -10,9 +10,10 @@ import (
 )
 
 // -----------------------------------------------------------------------------
-// Amazing! Someone went through a number of implementations and benchmarked it
+
+// Amazing! Someone went through a number of implementations and benchmarked it.
 // https://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-go
-// I am using the RandStringBytesMaskImprSrcSB version
+// I am using the RandStringBytesMaskImprSrcSB version.
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const (
 	letterIdxBits = 6                    // 6 bits to represent a letter index
@@ -23,7 +24,7 @@ const (
 var src = rand.NewSource(time.Now().UnixNano())
 
 // String produces a string of length n that contains random characters.
-// Characters are chosen from the following set: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+// Characters are chosen from the following set: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.
 func String(n int) string {
 	sb := strings.Builder{}
 	sb.Grow(n)
@@ -50,7 +51,7 @@ func Int(min int, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-// Read 4 bytes from the secure random number generator and convert it to an uint32
+// Read 4 bytes from the secure random number generator and convert it to an uint32.
 func SecureUint32() (uint32, error) {
 	var result uint32
 	err := binary.Read(crand.Reader, binary.LittleEndian, &result)

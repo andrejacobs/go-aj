@@ -3,8 +3,8 @@ package file
 import (
 	"bufio"
 	"context"
-	"crypto/md5"
-	"crypto/sha1"
+	"crypto/md5"  // #nosec G501 -- MD5 is not used for cryptography
+	"crypto/sha1" // #nosec G505 -- SHA1 is not used for cryptography
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
@@ -49,11 +49,11 @@ func Hash(ctx context.Context, path string, hasher hash.Hash, w io.Writer) ([]by
 }
 
 func HashMD5(ctx context.Context, path string, w io.Writer) ([]byte, uint64, error) {
-	return Hash(ctx, path, md5.New(), w)
+	return Hash(ctx, path, md5.New(), w) // #nosec G401 -- MD5 is not used for cryptography
 }
 
 func HashSHA1(ctx context.Context, path string, w io.Writer) ([]byte, uint64, error) {
-	return Hash(ctx, path, sha1.New(), w)
+	return Hash(ctx, path, sha1.New(), w) // #nosec G401 -- SHA1 is not used for cryptography
 }
 
 func HashSHA256(ctx context.Context, path string, w io.Writer) ([]byte, uint64, error) {

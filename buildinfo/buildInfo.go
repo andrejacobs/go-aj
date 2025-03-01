@@ -21,7 +21,7 @@ func VersionString() string {
 	return fmt.Sprintf("%s %s", version, GitCommitHash)
 }
 
-// Return the name of the app
+// Return the name of the app.
 func UsageName() string {
 	appName := "unknown"
 	if AppName != "" {
@@ -30,7 +30,7 @@ func UsageName() string {
 	return appName
 }
 
-// Return the name of the app and version info as displayed in the usage information
+// Return the name of the app and version info as displayed in the usage information.
 func UsageNameAndVersion() string {
 	return fmt.Sprintf("%s version: %s", UsageName(), VersionString())
 }

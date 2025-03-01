@@ -97,19 +97,19 @@ func (l *Lockfile) Release() error {
 	return err
 }
 
-// Path of the lock file
+// Path of the lock file.
 func (l *Lockfile) Path() string {
 	return l.path
 }
 
-// PID of the process that owns the lock file
+// PID of the process that owns the lock file.
 func (l *Lockfile) Pid() int {
 	return l.pid
 }
 
 //-----------------------------------------------------------------------------
 
-// Open a lock file and read the PID
+// Open a lock file and read the PID.
 func lockFileGetPid(path string) (int, error) {
 	f, err := os.Open(path)
 	if err != nil {

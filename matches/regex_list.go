@@ -5,12 +5,12 @@ import (
 	"regexp"
 )
 
-// A list of compiled regular expressions that can be used to match things
+// A list of compiled regular expressions that can be used to match things.
 type RegexList struct {
 	compiled []*regexp.Regexp
 }
 
-// Create a new RegexList that compiles the given regular expressions
+// Create a new RegexList that compiles the given regular expressions.
 func NewRegexList(expressions []string) (*RegexList, error) {
 	l := &RegexList{}
 	err := l.compile(expressions)
@@ -36,17 +36,17 @@ func (l *RegexList) compile(expressions []string) error {
 	return nil
 }
 
-// Returns true if the needle matches any of the compiled regular expressions
+// Returns true if the needle matches any of the compiled regular expressions.
 func (l *RegexList) MatchesAny(needle string) bool {
 	return matchesAnyRegexp(l.compiled, needle)
 }
 
-// Returns true if the needle matches all of the compiled regular expressions
+// Returns true if the needle matches all of the compiled regular expressions.
 func (l *RegexList) MatchesAll(needle string) bool {
 	return matchesAllRegexp(l.compiled, needle)
 }
 
-// Returns the slice of needles that matched any of the compiled regular expressions
+// Returns the slice of needles that matched any of the compiled regular expressions.
 func (l *RegexList) Matches(needles []string) []string {
 	return matchesRegexp(l.compiled, needles)
 }

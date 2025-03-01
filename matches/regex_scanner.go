@@ -10,21 +10,21 @@ import (
 // Reference on the go regex support: https://github.com/google/re2/wiki/Syntax
 
 // RegexScanner is used to read from an io.Reader line by line and then
-// tries to match the line against a set of regular expressions
+// tries to match the line against a set of regular expressions.
 type RegexScanner struct {
 	entries []regexScannerEntry
 	w       io.Writer
 }
 
-// Function that will be called when a regular expression found some matches
+// Function that will be called when a regular expression found some matches.
 type RegexScannerFoundMatches func(key string, line string, lineNumber int, matches []string) error
 
 // Result from the Process function. A map of the key to matching substrings.
-// NOTE: The result will always contain the last found match for a key (meaning the map is updated on each find)
+// NOTE: The result will always contain the last found match for a key (meaning the map is updated on each find).
 type RegexScannerResult map[string][]string
 
 // Register a regular expression that will try and find matches when the Process function is called
-// NOTE: To match case-insensitve add the prefix (?i) to the regular expression
+// NOTE: To match case-insensitive add the prefix (?i) to the regular expression.
 func (r *RegexScanner) Add(key string, expression string, foundFn RegexScannerFoundMatches) error {
 	regex, err := regexp.Compile(expression)
 	if err != nil {
@@ -61,7 +61,9 @@ func (r *RegexScanner) Process(rd io.Reader) (RegexScannerResult, error) {
 		line := scanner.Text()
 
 		if r.w != nil {
-			io.WriteString(r.w, line+"\n")
+			if _, err := io.WriteString(r.w, line+"\n"); err != nil {
+				return result, err
+			}
 		}
 
 		for _, entry := range r.entries {

@@ -19,19 +19,19 @@ func ReadDirUnsorted(name string) ([]os.DirEntry, error) {
 }
 
 // Sort a slice of os.DirEntry.
-// This performs the same sort found in os.ReadDir
+// This performs the same sort found in os.ReadDir.
 func SortDirEntries(dirs []os.DirEntry) {
 	sort.Slice(dirs, func(i, j int) bool { return dirs[i].Name() < dirs[j].Name() })
 }
 
-// Return true if two os.DirEntry are the same without comparing .Info() (which involves fetching more data)
+// Return true if two os.DirEntry are the same without comparing .Info() (which involves fetching more data).
 func IsDirEntryEqual(a os.DirEntry, b os.DirEntry) bool {
 	return (a.IsDir() == b.IsDir()) &&
 		(a.Type() == b.Type()) &&
 		(a.Name() == b.Name())
 }
 
-// Return true if two os.DirEntry are the same. This will also make a call to .Info() which invovles fetching more data and potentially result in an error
+// Return true if two os.DirEntry are the same. This will also make a call to .Info() which involves fetching more data and potentially result in an error.
 func IsDirEntryWithInfoEqual(a os.DirEntry, b os.DirEntry) (bool, error) {
 	if !IsDirEntryEqual(a, b) {
 		return false, nil

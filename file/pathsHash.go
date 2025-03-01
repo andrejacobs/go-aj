@@ -2,7 +2,7 @@ package file
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505 -- SHA1 is not used for cryptography
 	"sort"
 )
 
@@ -12,7 +12,7 @@ const (
 
 type PathHash [PathHashSize]byte
 
-// Calculate the unique hash for a path
+// Calculate the unique hash for a path.
 func CalculatePathHash(path string) PathHash {
 	return sha1.Sum([]byte(path))
 }

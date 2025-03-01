@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-// PathMatcher is used to determine if a file system path matches
+// PathMatcher is used to determine if a file system path matches.
 type PathMatcher interface {
 	// Match checks if the path matches and returns true if it does
 	Match(path string) (bool, error)
@@ -14,7 +14,7 @@ type PathMatcher interface {
 //-----------------------------------------------------------------------------
 // RegexPathMatcher
 
-// RegexPathMatcher will match a file system path against a set of regular expressions
+// RegexPathMatcher will match a file system path against a set of regular expressions.
 type RegexPathMatcher struct {
 	regexList *RegexList
 }

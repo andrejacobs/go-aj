@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-// Get the size of the file in bytes
+// Get the size of the file in bytes.
 func FileSize(path string) (int64, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -49,14 +49,14 @@ func CalculateDirSizeShallow(path string) (int64, []os.FileInfo, error) {
 	return total, infos, nil
 }
 
-// Results from CalculateSize
+// Results from CalculateSize.
 type CalculateSizeResult struct {
 	Dirs      int    // The number of directories
 	Files     int    // The number of regular files
 	TotalSize uint64 // The total size in bytes of all the regular files
 }
 
-// Walk the path recusively and count the number of directories, files and the total file size
+// Walk the path recusively and count the number of directories, files and the total file size.
 func CalculateSize(path string) (CalculateSizeResult, error) {
 	result := CalculateSizeResult{}
 

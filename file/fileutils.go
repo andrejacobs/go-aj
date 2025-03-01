@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 )
 
-// Check if the path exists
-// If the path exists then (true, nil) is returned
-// If the path does not exist then (false, nil) is returned
-// If an error occurred while trying to check if the path exists then (false, err) is returned
+// Check if the path exists.
+// If the path exists then (true, nil) is returned.
+// If the path does not exist then (false, nil) is returned.
+// If an error occurred while trying to check if the path exists then (false, err) is returned.
 func Exists(path string) (bool, error) {
 	if _, err := os.Stat(path); err == nil {
 		return true, nil
@@ -25,10 +25,10 @@ func Exists(path string) (bool, error) {
 
 //AJ### TODO: Does this even make sense? if I said DirExist, but a file exists then surely it should stop me from trying to create it
 
-// Check if the path exists and is a directory
-// If the path does not exists then (false, nil) will be returned
-// If the path exists but is not a directory then (false, nil) will be returned
-// An error is only returned if an error occurred while checking if the path exists
+// Check if the path exists and is a directory.
+// If the path does not exists then (false, nil) will be returned.
+// If the path exists but is not a directory then (false, nil) will be returned.
+// An error is only returned if an error occurred while checking if the path exists.
 func DirExists(path string) (bool, error) {
 	if info, err := os.Stat(path); err == nil {
 		return info.IsDir(), nil
@@ -39,10 +39,10 @@ func DirExists(path string) (bool, error) {
 	}
 }
 
-// Check if the path exists and is a file
-// If the path does not exists then (false, nil) will be returned
-// If the path exists but is not a file then (false, nil) will be returned
-// An error is only returned if an error occurred while checking if the path exists
+// Check if the path exists and is a file.
+// If the path does not exists then (false, nil) will be returned.
+// If the path exists but is not a file then (false, nil) will be returned.
+// An error is only returned if an error occurred while checking if the path exists.
 func FileExists(path string) (bool, error) {
 	if info, err := os.Stat(path); err == nil {
 		return !info.IsDir(), nil
@@ -54,7 +54,7 @@ func FileExists(path string) (bool, error) {
 }
 
 // Recursively find all files in dir that matches the specified extension.
-// NOTE: ext must include the dot (period) e.g.  .txt
+// NOTE: ext must include the dot (period) e.g.  .txt.
 func GlobExt(dir string, ext string) ([]string, error) {
 	files := []string{}
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
@@ -94,7 +94,7 @@ func AbsPaths(paths []string, checkExists bool) ([]string, error) {
 	return absPaths, nil
 }
 
-// Replace the path's file extension with a new one
+// Replace the path's file extension with a new one.
 func ReplaceExt(path string, newExt string) string {
 	ext := filepath.Ext(path)
 	if len(ext) < 1 {
@@ -106,7 +106,7 @@ func ReplaceExt(path string, newExt string) string {
 }
 
 // Delete the path if it exists and only return an error if something went wrong other
-// than the fact that the path didn't exist
+// than the fact that the path didn't exist.
 func RemoveIfExists(path string) error {
 	if err := os.Remove(path); err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {

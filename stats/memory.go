@@ -8,14 +8,14 @@ import (
 	"github.com/andrejacobs/go-aj/human"
 )
 
-// Get the memory usage stats
+// Get the memory usage stats.
 func GetMemoryUsage() runtime.MemStats {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	return m
 }
 
-// Print out the memory usage
+// Print out the memory usage.
 func PrintMemoryUsage(w io.Writer, msg string, m runtime.MemStats) {
 	// Taken from: https://golangcode.com/print-the-current-memory-usage/
 	// For info on each, see: https://golang.org/pkg/runtime/#MemStats

@@ -23,39 +23,39 @@ type VariableDataFixedLen[S constraints.Unsigned] struct {
 	read     readFunc
 }
 
-// Create a new VariableData instance that will use 1 byte for the data prefix size
+// Create a new VariableData instance that will use 1 byte for the data prefix size.
 func NewVariableDataUint8() *VariableDataFixedLen[uint8] {
 	return &VariableDataFixedLen[uint8]{size: 1, maxValue: math.MaxUint8, order: binary.LittleEndian, write: writeUint8, read: readUint8}
 }
 
-// Create a new VariableData instance that will use 2 bytes for the data prefix size
+// Create a new VariableData instance that will use 2 bytes for the data prefix size.
 func NewVariableDataUint16() *VariableDataFixedLen[uint16] {
 	return &VariableDataFixedLen[uint16]{size: 2, maxValue: math.MaxUint16, order: binary.LittleEndian, write: writeUint16, read: readUint16}
 }
 
-// Create a new VariableData instance that will use 4 bytes for the data prefix size
+// Create a new VariableData instance that will use 4 bytes for the data prefix size.
 func NewVariableDataUint32() *VariableDataFixedLen[uint32] {
 	return &VariableDataFixedLen[uint32]{size: 4, maxValue: math.MaxUint32, order: binary.LittleEndian, write: writeUint32, read: readUint32}
 }
 
-// Create a new VariableData instance that will use 8 bytes for the data prefix size
+// Create a new VariableData instance that will use 8 bytes for the data prefix size.
 func NewVariableDataUint64() *VariableDataFixedLen[uint64] {
 	return &VariableDataFixedLen[uint64]{size: 8, maxValue: math.MaxUint64, order: binary.LittleEndian, write: writeUint64, read: readUint64}
 }
 
-// Use little endianess
+// Use little endianess.
 func (v *VariableDataFixedLen[S]) LittleEndian() *VariableDataFixedLen[S] {
 	v.order = binary.LittleEndian
 	return v
 }
 
-// Use big endianess
+// Use big endianess.
 func (v *VariableDataFixedLen[S]) BigEndian() *VariableDataFixedLen[S] {
 	v.order = binary.BigEndian
 	return v
 }
 
-// Use the native platform's endianess. Not recommened.
+// Use the native platform's endianess. Not recommended.
 func (v *VariableDataFixedLen[S]) NativeEndian() *VariableDataFixedLen[S] {
 	v.order = binary.NativeEndian
 	return v
@@ -66,12 +66,12 @@ func (v *VariableDataFixedLen[S]) MaxSize() S {
 	return v.maxValue
 }
 
-// The number of bytes that will be used to write the data prefix. e.g. Uint16 will use 2 bytes
+// The number of bytes that will be used to write the data prefix. e.g. Uint16 will use 2 bytes.
 func (v *VariableDataFixedLen[S]) PrefixSize() int {
 	return v.size
 }
 
-// Return the byte order (endianess) used
+// Return the byte order (endianess) used.
 func (v *VariableDataFixedLen[S]) ByteOrder() binary.ByteOrder {
 	return v.order
 }
@@ -94,7 +94,7 @@ func (v *VariableDataFixedLen[S]) Read(r io.Reader, buffer []byte) ([]byte, int,
 	return v.read(r, buffer, v.order)
 }
 
-// Write a string using the generic Write method to prefix the length of the string first and reducing allocs
+// Write a string using the generic Write method to prefix the length of the string first and reducing allocs.
 func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, error) {
 	dataLen := len(data)
 	if uint64(dataLen) > uint64(v.maxValue) {
@@ -105,13 +105,13 @@ func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, er
 	dt := any(v.maxValue)
 	switch dt.(type) {
 	case uint8:
-		err = binary.Write(w, v.order, uint8(dataLen))
+		err = binary.Write(w, v.order, uint8(dataLen)) // #nosec G115 -- Overflow is checked above
 	case uint16:
-		err = binary.Write(w, v.order, uint16(dataLen))
+		err = binary.Write(w, v.order, uint16(dataLen)) // #nosec G115 -- Overflow is checked above
 	case uint32:
-		err = binary.Write(w, v.order, uint32(dataLen))
+		err = binary.Write(w, v.order, uint32(dataLen)) // #nosec G115 -- Overflow is checked above
 	case uint64:
-		err = binary.Write(w, v.order, uint64(dataLen))
+		err = binary.Write(w, v.order, uint64(dataLen)) // #nosec G115 -- Overflow is checked above
 	default:
 		panic("unsupported parameter type")
 	}
@@ -125,7 +125,7 @@ func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, er
 
 // Read a string.
 // NOTE: If you are going to be reading a lot of strings then it is better to use the generic Read method
-// and passing in a pre-allocated []byte
+// and passing in a pre-allocated []byte.
 func (v *VariableDataFixedLen[S]) ReadString(r io.Reader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {
@@ -145,12 +145,12 @@ type VariableData struct {
 	order binary.ByteOrder
 }
 
-// Create a new VariableDataVarInt instance that will use between 1 and 10 bytes for the data prefix size
+// Create a new VariableDataVarInt instance that will use between 1 and 10 bytes for the data prefix size.
 func NewVariableData() *VariableData {
 	return &VariableData{order: binary.LittleEndian}
 }
 
-// Return the byte order (endianess) used
+// Return the byte order (endianess) used.
 func (v *VariableData) ByteOrder() binary.ByteOrder {
 	return v.order
 }
@@ -195,7 +195,7 @@ func (v *VariableData) Read(r MultiByteReader, buffer []byte) ([]byte, int, erro
 	return buffer, n + varintSize, nil
 }
 
-// Write a string using the generic Write method to prefix the length of the string first and reducing allocs
+// Write a string using the generic Write method to prefix the length of the string first and reducing allocs.
 func (v *VariableData) WriteString(w io.Writer, data string) (int, error) {
 	dataLen := len(data)
 
@@ -213,7 +213,7 @@ func (v *VariableData) WriteString(w io.Writer, data string) (int, error) {
 
 // Read a string.
 // NOTE: If you are going to be reading a lot of strings then it is better to use the generic Read method
-// and passing in a pre-allocated []byte
+// and passing in a pre-allocated []byte.
 func (v *VariableData) ReadString(r MultiByteReader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {

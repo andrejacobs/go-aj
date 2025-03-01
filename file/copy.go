@@ -10,7 +10,7 @@ import (
 	"github.com/andrejacobs/go-aj/file/contextio"
 )
 
-// Copy the source file to the destination and return the number of bytes that were copied
+// Copy the source file to the destination and return the number of bytes that were copied.
 func CopyFile(ctx context.Context, source string, destination string) (int64, error) {
 	src, dest, srcInfo, err := openFilesForCopying(source, destination)
 	if err != nil {
@@ -27,7 +27,7 @@ func CopyFile(ctx context.Context, source string, destination string) (int64, er
 	return wc, nil
 }
 
-// Copy N bytes from the source file to the destination and return the number of bytes that were copied
+// Copy N bytes from the source file to the destination and return the number of bytes that were copied.
 func CopyFileN(ctx context.Context, source string, destination string, count int64) (int64, error) {
 	src, dest, _, err := openFilesForCopying(source, destination)
 	if err != nil {

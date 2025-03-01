@@ -14,7 +14,7 @@ type MultiByteReader interface {
 	io.ByteReader
 }
 
-// Need to do MultiByteReader but also support seeking
+// Need to do MultiByteReader but also support seeking.
 type MultiByteReaderSeeker interface {
 	MultiByteReader
 	io.Seeker
@@ -27,7 +27,7 @@ type wrappedBufIOReadSeeker struct {
 	br *bufio.Reader
 }
 
-// Create a new bufio.Reader that also supports being able to do io.Seeker
+// Create a new bufio.Reader that also supports being able to do io.Seeker.
 func NewMultiByteReaderSeeker(rs io.ReadSeeker) MultiByteReaderSeeker {
 	return &wrappedBufIOReadSeeker{
 		rs: rs,
@@ -35,7 +35,7 @@ func NewMultiByteReaderSeeker(rs io.ReadSeeker) MultiByteReaderSeeker {
 	}
 }
 
-// Create a new bufio.Reader with size, that also supports being able to do io.Seeker
+// Create a new bufio.Reader with size, that also supports being able to do io.Seeker.
 func NewMultiByteReaderSeekerSize(rs io.ReadSeeker, size int) MultiByteReaderSeeker {
 	return &wrappedBufIOReadSeeker{
 		rs: rs,
