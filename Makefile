@@ -44,6 +44,9 @@ check-formatting:
 	@test -z $(shell gofmt -e -l ./ | tee /dev/stderr) || (echo "Please fix formatting first with gofmt" && exit 1)
 
 # Check for other possible issues in the code
+# NOTE: To install golangci-lint
+# https://golangci-lint.run/welcome/install/#local-installation
+# curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.5
 .PHONY: check-lint
 check-lint:
 	@echo "Linting code"
