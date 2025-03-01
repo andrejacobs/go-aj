@@ -52,7 +52,7 @@ func TestMultiByteTrackedOffsetReader(t *testing.T) {
 	sr := strings.NewReader(text)
 	br := bufio.NewReader(sr)
 
-	tr := ajio.NewMultiByteTrackedOffsetReader(br, 0)
+	tr := ajio.NewTrackedOffsetReaderMultiByte(br, 0)
 	assert.Equal(t, int64(0), tr.Offset())
 
 	buffer := make([]byte, 4)
@@ -68,7 +68,7 @@ func TestMultiByteTrackedOffsetReader(t *testing.T) {
 		br.ReadByte()
 	}
 
-	tr = ajio.NewMultiByteTrackedOffsetReader(br, 4)
+	tr = ajio.NewTrackedOffsetReaderMultiByte(br, 4)
 	assert.Equal(t, int64(4), tr.Offset())
 
 	b, err := tr.ReadByte()
@@ -84,7 +84,7 @@ func TestMultiByteTrackedOffsetReader(t *testing.T) {
 
 //-----------------------------------------------------------------------------
 
-func TestNewFileOffsetTracker(t *testing.T) {
+func TestNewFileTrackedOffset(t *testing.T) {
 	tempFile, err := createTempFile(10)
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
@@ -93,13 +93,13 @@ func TestNewFileOffsetTracker(t *testing.T) {
 	require.NoError(t, err)
 	defer f.Close()
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 	offset := tracker.Offset()
 	assert.Equal(t, int64(0), offset)
 }
 
-func TestNewFileOffsetTrackerWithExistingOffset(t *testing.T) {
+func TestNewFileTrackedOffsetWithExistingOffset(t *testing.T) {
 	tempFile, err := createTempFile(10)
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
@@ -110,13 +110,13 @@ func TestNewFileOffsetTrackerWithExistingOffset(t *testing.T) {
 	expectedOffset, err := f.Seek(5, io.SeekStart)
 	require.NoError(t, err)
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 	offset := tracker.Offset()
 	assert.Equal(t, expectedOffset, offset)
 }
 
-func TestFileOffsetTrackerSeek(t *testing.T) {
+func TestFileTrackedOffsetSeek(t *testing.T) {
 	tempFile, err := createTempFile(10)
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
@@ -125,7 +125,7 @@ func TestFileOffsetTrackerSeek(t *testing.T) {
 	require.NoError(t, err)
 	defer f.Close()
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 
 	expectedOffset, err := tracker.Seek(4, io.SeekStart)
@@ -156,7 +156,7 @@ func TestFileOffsetTrackerSeek(t *testing.T) {
 	assert.Equal(t, actualOffset, expectedOffset)
 }
 
-func TestFileOffsetTrackerRead(t *testing.T) {
+func TestFileTrackedOffsetRead(t *testing.T) {
 	fileSize := 10
 	tempFile, err := createTempFile(int64(fileSize))
 	require.NoError(t, err)
@@ -166,7 +166,7 @@ func TestFileOffsetTrackerRead(t *testing.T) {
 	require.NoError(t, err)
 	defer f.Close()
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 
 	buffer := make([]byte, 2)
@@ -185,7 +185,7 @@ func TestFileOffsetTrackerRead(t *testing.T) {
 	assert.Equal(t, int64(6), tracker.Offset())
 }
 
-func TestFileOffsetTrackerWrite(t *testing.T) {
+func TestFileTrackedOffsetWrite(t *testing.T) {
 	fileSize := 10
 	tempFile, err := createTempFile(int64(fileSize))
 	require.NoError(t, err)
@@ -195,7 +195,7 @@ func TestFileOffsetTrackerWrite(t *testing.T) {
 	require.NoError(t, err)
 	defer f.Close()
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 
 	buffer := make([]byte, 2)
@@ -214,7 +214,7 @@ func TestFileOffsetTrackerWrite(t *testing.T) {
 	assert.Equal(t, int64(6), tracker.Offset())
 }
 
-func TestFileOffsetTrackerSyncOffset(t *testing.T) {
+func TestFileTrackedOffsetSyncOffset(t *testing.T) {
 	tempFile, err := createTempFile(10)
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
@@ -223,7 +223,7 @@ func TestFileOffsetTrackerSyncOffset(t *testing.T) {
 	require.NoError(t, err)
 	defer f.Close()
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 
 	// Out of sync
@@ -238,7 +238,7 @@ func TestFileOffsetTrackerSyncOffset(t *testing.T) {
 	assert.Equal(t, actualOffset, tracker.Offset())
 }
 
-func TestFileOffsetTrackerReaderAtWriterAt(t *testing.T) {
+func TestFileTrackedOffsetReaderAtWriterAt(t *testing.T) {
 	fileSize := 10
 	tempFile, err := createTempFile(int64(fileSize))
 	require.NoError(t, err)
@@ -248,7 +248,7 @@ func TestFileOffsetTrackerReaderAtWriterAt(t *testing.T) {
 	require.NoError(t, err)
 	defer f.Close()
 
-	tracker, err := ajio.NewFileOffsetTracker(f)
+	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 
 	expected := []byte{0x41, 0x4a}

@@ -21,8 +21,8 @@ type TrackedOffsetWriter interface {
 	Offset() int64
 }
 
-// OffsetTracker keeps track of the current offset within file like objects without requiring to make calls to Seek
-type OffsetTracker interface {
+// TrackedOffset keeps track of the current offset within file like objects without requiring to make calls to Seek
+type TrackedOffset interface {
 	io.Reader
 	io.Writer
 	io.Seeker
@@ -112,15 +112,15 @@ func (t *writer) Offset() int64 {
 //-----------------------------------------------------------------------------
 
 // Wrap os.File to keep track of the current offset without needing to make constant calls to Seek which involves syscall Lseek
-type fileOffsetTracker struct {
+type fileTrackedOffset struct {
 	f      *os.File
 	offset int64
 }
 
-// Create a new OffsetTracker that will keep track of the file's offset.
+// Create a new TrackedOffset that will keep track of the file's offset.
 // NOTE: An initital Seek will be called on the file to establish the current offset.
-func NewFileOffsetTracker(f *os.File) (OffsetTracker, error) {
-	t := &fileOffsetTracker{
+func NewTrackedOffsetFile(f *os.File) (TrackedOffset, error) {
+	t := &fileTrackedOffset{
 		f: f,
 	}
 
@@ -132,7 +132,7 @@ func NewFileOffsetTracker(f *os.File) (OffsetTracker, error) {
 }
 
 // Reader implementation
-func (t *fileOffsetTracker) Read(p []byte) (int, error) {
+func (t *fileTrackedOffset) Read(p []byte) (int, error) {
 	n, err := t.f.Read(p)
 	if err != nil {
 		return n, err
@@ -144,7 +144,7 @@ func (t *fileOffsetTracker) Read(p []byte) (int, error) {
 }
 
 // Writer implementation
-func (t *fileOffsetTracker) Write(p []byte) (int, error) {
+func (t *fileTrackedOffset) Write(p []byte) (int, error) {
 	n, err := t.f.Write(p)
 	if err != nil {
 		return n, err
@@ -156,7 +156,7 @@ func (t *fileOffsetTracker) Write(p []byte) (int, error) {
 }
 
 // Seeker implementation
-func (t *fileOffsetTracker) Seek(offset int64, whence int) (int64, error) {
+func (t *fileTrackedOffset) Seek(offset int64, whence int) (int64, error) {
 	newOffset, err := t.f.Seek(offset, whence)
 	if err != nil {
 		return newOffset, err
@@ -166,7 +166,7 @@ func (t *fileOffsetTracker) Seek(offset int64, whence int) (int64, error) {
 }
 
 // ReaderAt implementation
-func (t *fileOffsetTracker) ReadAt(p []byte, off int64) (int, error) {
+func (t *fileTrackedOffset) ReadAt(p []byte, off int64) (int, error) {
 	n, err := t.f.ReadAt(p, off)
 	if err != nil {
 		return n, err
@@ -178,7 +178,7 @@ func (t *fileOffsetTracker) ReadAt(p []byte, off int64) (int, error) {
 }
 
 // WriterAt implementation
-func (t *fileOffsetTracker) WriteAt(p []byte, off int64) (int, error) {
+func (t *fileTrackedOffset) WriteAt(p []byte, off int64) (int, error) {
 	n, err := t.f.WriteAt(p, off)
 	if err != nil {
 		return n, err
@@ -191,14 +191,14 @@ func (t *fileOffsetTracker) WriteAt(p []byte, off int64) (int, error) {
 
 //-----------------------------------------------------------------------------
 
-// OffsetTracker implementation
-func (t *fileOffsetTracker) Offset() int64 {
+// TrackedOffset implementation
+func (t *fileTrackedOffset) Offset() int64 {
 	return t.offset
 }
 
 // Ensure the tracker's offset and the file's actual offsets are the same.
 // This will make a call to file.Seek
-func (t *fileOffsetTracker) SyncOffset() error {
+func (t *fileTrackedOffset) SyncOffset() error {
 	offset, err := t.f.Seek(0, io.SeekCurrent)
 	if err != nil {
 		return err
@@ -216,7 +216,7 @@ type wrappedMBReader struct {
 }
 
 // Create a new bufio.Reader that also supports being able to do io.Seeker
-func NewMultiByteTrackedOffsetReader(rd MultiByteReader, baseOffset int64) MultiByteTrackedOffsetReader {
+func NewTrackedOffsetReaderMultiByte(rd MultiByteReader, baseOffset int64) MultiByteTrackedOffsetReader {
 	return &wrappedMBReader{
 		rd:     rd,
 		offset: baseOffset,
