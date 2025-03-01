@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDuplicateOutputs(t *testing.T) {
+func TestFanout(t *testing.T) {
 	expectedCount := 10000
 	producer := make(chan int, 1000)
 
@@ -30,7 +30,7 @@ func TestDuplicateOutputs(t *testing.T) {
 	}()
 
 	// Duplicate the producer to output to multiple channels
-	go concurrency.DuplicateOutputs[int](context.Background(), producer, consumers...)
+	go concurrency.Fanout(context.Background(), producer, consumers...)
 
 	// Consume from all the duplicate producers
 	wg := sync.WaitGroup{}
@@ -53,7 +53,7 @@ func TestDuplicateOutputs(t *testing.T) {
 	wg.Wait()
 }
 
-func TestDuplicateTransformedOutputs(t *testing.T) {
+func TestTransformedFanout(t *testing.T) {
 	expectedCount := 10000
 	producer := make(chan int, 1000)
 
@@ -72,7 +72,7 @@ func TestDuplicateTransformedOutputs(t *testing.T) {
 	}()
 
 	// Duplicate the producer to output to multiple channels
-	go concurrency.DuplicateTransformedOutputs[int](context.Background(),
+	go concurrency.TransformedFanout(context.Background(),
 		func(in int) int {
 			return in * 2
 		},
@@ -99,7 +99,7 @@ func TestDuplicateTransformedOutputs(t *testing.T) {
 	wg.Wait()
 }
 
-func TestDuplicateOutputsWithTimeout(t *testing.T) {
+func TestFanoutWithTimeout(t *testing.T) {
 	expectedCount := 1000
 	producer := make(chan int)
 
@@ -120,7 +120,7 @@ func TestDuplicateOutputsWithTimeout(t *testing.T) {
 	// Duplicate the producer to output to multiple channels
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
 	defer cancel()
-	go concurrency.DuplicateOutputs[int](ctx, producer, consumers...)
+	go concurrency.Fanout(ctx, producer, consumers...)
 
 	// Consume from all the duplicate producers
 	wg := sync.WaitGroup{}
@@ -138,7 +138,7 @@ func TestDuplicateOutputsWithTimeout(t *testing.T) {
 	wg.Wait()
 }
 
-func TestDuplicateOutputsDifferentRates(t *testing.T) {
+func TestFanoutDifferentRates(t *testing.T) {
 	expectedCount := 100
 	producer := make(chan int, 100)
 
@@ -159,7 +159,7 @@ func TestDuplicateOutputsDifferentRates(t *testing.T) {
 	}()
 
 	// Duplicate the producer to output to multiple channels
-	go concurrency.DuplicateOutputs[int](context.Background(), producer, consumers...)
+	go concurrency.Fanout(context.Background(), producer, consumers...)
 
 	// Consume from all the duplicate producers
 	wg := sync.WaitGroup{}
