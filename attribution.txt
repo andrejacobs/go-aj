@@ -1,0 +1,7 @@
+file/contextio
+    Olivier Mengué: Apache License, Version 2.0
+    https://github.com/dolmen-go/contextio
+
+human/bytes.go
+    Dustin Sallings: MIT
+    https://github.com/dustin/go-humanize

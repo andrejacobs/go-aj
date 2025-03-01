@@ -2,13 +2,16 @@ package file_test
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"slices"
 	"testing"
 	"time"
 
 	"github.com/andrejacobs/go-micropkg/file"
+	"github.com/andrejacobs/go-micropkg/stats"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -110,13 +113,23 @@ func TestDirExcluder(t *testing.T) {
 func BenchmarkConcurrentWalker(b *testing.B) {
 	// For small directories the concurrent walker is slower
 	// point this to somewhere with a lot of files etc.
-	//tempDir := "/Users/andre/temp"
+	// You can set the environment variable: AJ_BENCH_DIR to point to the directory to be used.
+	// $ AJ_BENCH_DIR=~/Tools go test -benchmem -run=^$ -bench ^BenchmarkConcurrentWalker$ github.com/andrejacobs/go-micropkg/file -v
+
+	eDir := os.Getenv("AJ_BENCH_DIR")
+	if eDir != "" {
+		fmt.Printf("Benchmark will be using the directory: %q\n", eDir)
+		tempDir = eDir
+	}
 
 	b.Run("filepath.Walk", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
+			start := time.Now()
 			err := filepath.Walk(tempDir, func(path string, info fs.FileInfo, err error) error {
 				return nil
 			})
+			end := time.Now()
+			stats.PrintTimeTaken(os.Stdout, "filepath.Walk", start, end)
 			if err != nil {
 				b.Error(err)
 			}
@@ -132,7 +145,7 @@ func BenchmarkConcurrentWalker(b *testing.B) {
 	ctx := context.TODO()
 	b.Run("ConcurrentWalker", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-
+			start := time.Now()
 			_, cancel, err := walker.StartWalking(ctx, tempDir, walkFunc)
 			if err != nil {
 				b.Error(err)
@@ -140,6 +153,8 @@ func BenchmarkConcurrentWalker(b *testing.B) {
 			}
 			defer cancel()
 			walker.Wait()
+			end := time.Now()
+			stats.PrintTimeTaken(os.Stdout, "ConcurrentWalker", start, end)
 
 			if walker.HadErrors() {
 				b.Errorf("had errors")
