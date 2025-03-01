@@ -14,12 +14,12 @@ import (
 
 //-----------------------------------------------------------------------------
 
-func TestOffsetTrackedReader(t *testing.T) {
+func TestTrackedOffsetReader(t *testing.T) {
 	text := "The quick brown fox jumped over the lazy dog!"
 	sr := strings.NewReader(text)
 	br := bufio.NewReader(sr)
 
-	tr := ajio.NewOffsetTrackedReader(br, 0)
+	tr := ajio.NewTrackedOffsetReader(br, 0)
 	assert.Equal(t, int64(0), tr.Offset())
 
 	buffer := make([]byte, 4)
@@ -32,12 +32,12 @@ func TestOffsetTrackedReader(t *testing.T) {
 
 //-----------------------------------------------------------------------------
 
-func TestMultiByteOffsetTrackedReader(t *testing.T) {
+func TestMultiByteTrackedOffsetReader(t *testing.T) {
 	text := "The quick brown fox jumped over the lazy dog!"
 	sr := strings.NewReader(text)
 	br := bufio.NewReader(sr)
 
-	tr := ajio.NewMultiByteOffsetTrackedReader(br, 0)
+	tr := ajio.NewMultiByteTrackedOffsetReader(br, 0)
 	assert.Equal(t, int64(0), tr.Offset())
 
 	buffer := make([]byte, 4)
@@ -53,7 +53,7 @@ func TestMultiByteOffsetTrackedReader(t *testing.T) {
 		br.ReadByte()
 	}
 
-	tr = ajio.NewMultiByteOffsetTrackedReader(br, 4)
+	tr = ajio.NewMultiByteTrackedOffsetReader(br, 4)
 	assert.Equal(t, int64(4), tr.Offset())
 
 	b, err := tr.ReadByte()

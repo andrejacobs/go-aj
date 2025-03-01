@@ -6,7 +6,7 @@ import (
 )
 
 // Keep track of the offset within a io.Reader source
-type OffsetTrackedReader interface {
+type TrackedOffsetReader interface {
 	io.Reader
 
 	// Return the current offset
@@ -31,9 +31,9 @@ type OffsetTracker interface {
 	SyncOffset() error
 }
 
-// MultiByteOffsetTrackedReader is the same as OffsetTrackedReader but with the io.ByteReader added
-type MultiByteOffsetTrackedReader interface {
-	OffsetTrackedReader
+// MultiByteTrackedOffsetReader is the same as TrackedOffsetReader but with the io.ByteReader added
+type MultiByteTrackedOffsetReader interface {
+	TrackedOffsetReader
 	io.ByteReader
 }
 
@@ -46,8 +46,8 @@ type reader struct {
 	offset int64
 }
 
-// Create a new OffsetTrackedReader that will keep track of the offset within the source io.ReadSeeker object.
-func NewOffsetTrackedReader(rd io.Reader, baseOffset int64) OffsetTrackedReader {
+// Create a new TrackedOffsetReader that will keep track of the offset within the source io.ReadSeeker object.
+func NewTrackedOffsetReader(rd io.Reader, baseOffset int64) TrackedOffsetReader {
 	t := &reader{
 		rd:     rd,
 		offset: int64(baseOffset),
@@ -67,7 +67,7 @@ func (t *reader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
-// OffsetTrackedReader implementation
+// TrackedOffsetReader implementation
 func (t *reader) Offset() int64 {
 	return t.offset
 }
@@ -179,7 +179,7 @@ type wrappedMBReader struct {
 }
 
 // Create a new bufio.Reader that also supports being able to do io.Seeker
-func NewMultiByteOffsetTrackedReader(rd MultiByteReader, baseOffset int64) MultiByteOffsetTrackedReader {
+func NewMultiByteTrackedOffsetReader(rd MultiByteReader, baseOffset int64) MultiByteTrackedOffsetReader {
 	return &wrappedMBReader{
 		rd:     rd,
 		offset: baseOffset,
