@@ -1,5 +1,6 @@
 # TODO
 
+-   [] Look at all the AJ### comments
 -   [] Check we wrap errors correctly with %w and not %v
 
 -   [] Review all the code before being happy to publish a v0.1.0

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Keep track of the offset within a io.Reader source
+// Keep track of the offset within an io.Reader source
 type TrackedOffsetReader interface {
 	io.Reader
 
@@ -13,7 +13,13 @@ type TrackedOffsetReader interface {
 	Offset() int64
 }
 
-//AJ### TODO: Create a similar Writer as above and then look at condensing this OffsetTracker below to use the other interfaces
+// Keep track of the offset within an io.Writer source
+type TrackedOffsetWriter interface {
+	io.Writer
+
+	// Return the current offset
+	Offset() int64
+}
 
 // OffsetTracker keeps track of the current offset within file like objects without requiring to make calls to Seek
 type OffsetTracker interface {
@@ -37,8 +43,6 @@ type MultiByteTrackedOffsetReader interface {
 	io.ByteReader
 }
 
-//^^ this is so fucking stupid just to get a way to do ReadByte for varint
-
 //-----------------------------------------------------------------------------
 
 type reader struct {
@@ -46,7 +50,7 @@ type reader struct {
 	offset int64
 }
 
-// Create a new TrackedOffsetReader that will keep track of the offset within the source io.ReadSeeker object.
+// Create a new TrackedOffsetReader that will keep track of the offset within the source io.Reader object.
 func NewTrackedOffsetReader(rd io.Reader, baseOffset int64) TrackedOffsetReader {
 	t := &reader{
 		rd:     rd,
@@ -69,6 +73,39 @@ func (t *reader) Read(p []byte) (int, error) {
 
 // TrackedOffsetReader implementation
 func (t *reader) Offset() int64 {
+	return t.offset
+}
+
+//-----------------------------------------------------------------------------
+
+type writer struct {
+	wd     io.Writer
+	offset int64
+}
+
+// Create a new TrackedOffsetWriter that will keep track of the offset within the source io.Writer object.
+func NewTrackedOffsetWriter(wd io.Writer, baseOffset int64) TrackedOffsetWriter {
+	t := &writer{
+		wd:     wd,
+		offset: int64(baseOffset),
+	}
+	return t
+}
+
+// Writer implementation
+func (t *writer) Write(p []byte) (int, error) {
+	n, err := t.wd.Write(p)
+	if err != nil {
+		return n, err
+	}
+
+	t.offset += int64(n)
+
+	return n, nil
+}
+
+// TrackedOffsetWriter implementation
+func (t *writer) Offset() int64 {
 	return t.offset
 }
 

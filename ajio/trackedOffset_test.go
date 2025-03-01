@@ -19,15 +19,30 @@ func TestTrackedOffsetReader(t *testing.T) {
 	sr := strings.NewReader(text)
 	br := bufio.NewReader(sr)
 
-	tr := ajio.NewTrackedOffsetReader(br, 0)
-	assert.Equal(t, int64(0), tr.Offset())
+	baseOffset := int64(42)
+	tr := ajio.NewTrackedOffsetReader(br, baseOffset)
+	assert.Equal(t, baseOffset, tr.Offset())
 
 	buffer := make([]byte, 4)
 	for i := 0; i < len(text)/4; i++ {
 		_, err := tr.Read(buffer)
 		require.NoError(t, err)
-		assert.Equal(t, int64((i+1)*4), tr.Offset())
+		assert.Equal(t, baseOffset+int64((i+1)*4), tr.Offset())
 	}
+}
+
+//-----------------------------------------------------------------------------
+
+func TestTrackedOffsetWriter(t *testing.T) {
+	baseOffset := int64(42)
+	tw := ajio.NewTrackedOffsetWriter(io.Discard, baseOffset)
+	assert.Equal(t, baseOffset, tw.Offset())
+
+	data := []byte("The quick brown fox jumped over the lazy dog!")
+	c, err := tw.Write(data)
+	require.NoError(t, err)
+	assert.Equal(t, len(data), c)
+	assert.Equal(t, baseOffset+int64(len(data)), tw.Offset())
 }
 
 //-----------------------------------------------------------------------------
