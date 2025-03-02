@@ -42,8 +42,6 @@ func PathExists(path string) (bool, error) {
 	}
 }
 
-//AJ### TODO: Does this even make sense? if I said DirExist, but a file exists then surely it should stop me from trying to create it
-
 // Check if the path exists and is a directory.
 // If the path does not exists then (false, nil) will be returned.
 // If the path exists but is not a directory then (false, nil) will be returned.
@@ -58,13 +56,13 @@ func DirExists(path string) (bool, error) {
 	}
 }
 
-// Check if the path exists and is a file.
+// Check if the path exists and is a regular file.
 // If the path does not exists then (false, nil) will be returned.
-// If the path exists but is not a file then (false, nil) will be returned.
+// If the path exists but is not a regular file then (false, nil) will be returned.
 // An error is only returned if an error occurred while checking if the path exists.
 func FileExists(path string) (bool, error) {
 	if info, err := os.Stat(path); err == nil {
-		return !info.IsDir(), nil
+		return info.Mode().IsRegular(), nil
 	} else if errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	} else {

@@ -37,12 +37,24 @@ func TestExists(t *testing.T) {
 	exists, err := file.PathExists(d)
 	require.NoError(t, err)
 	require.True(t, exists)
+	exists, err = file.DirExists(d)
+	require.NoError(t, err)
+	require.True(t, exists)
+	exists, err = file.FileExists(d)
+	require.NoError(t, err)
+	require.False(t, exists)
 
 	f, err := makeValidFile()
 	defer os.Remove(f)
 	require.NoError(t, err)
 	require.FileExists(t, f)
 	exists, err = file.PathExists(f)
+	require.NoError(t, err)
+	require.True(t, exists)
+	exists, err = file.DirExists(f)
+	require.NoError(t, err)
+	require.False(t, exists)
+	exists, err = file.FileExists(f)
 	require.NoError(t, err)
 	require.True(t, exists)
 
@@ -52,6 +64,12 @@ func TestExists(t *testing.T) {
 	exists, err = file.PathExists(d)
 	require.NoError(t, err)
 	require.False(t, exists)
+	exists, err = file.DirExists(d)
+	require.NoError(t, err)
+	require.False(t, exists)
+	exists, err = file.FileExists(d)
+	require.NoError(t, err)
+	require.False(t, exists)
 
 	f, err = makeInvalidFile()
 	require.NoError(t, err)
@@ -59,7 +77,12 @@ func TestExists(t *testing.T) {
 	exists, err = file.PathExists(f)
 	require.NoError(t, err)
 	require.False(t, exists)
-
+	exists, err = file.DirExists(f)
+	require.NoError(t, err)
+	require.False(t, exists)
+	exists, err = file.FileExists(f)
+	require.NoError(t, err)
+	require.False(t, exists)
 }
 
 func TestAbsPaths(t *testing.T) {
