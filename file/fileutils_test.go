@@ -34,7 +34,7 @@ func TestExists(t *testing.T) {
 	defer os.RemoveAll(d)
 	require.NoError(t, err)
 	require.DirExists(t, d)
-	exists, err := file.Exists(d)
+	exists, err := file.PathExists(d)
 	require.NoError(t, err)
 	require.True(t, exists)
 
@@ -42,21 +42,21 @@ func TestExists(t *testing.T) {
 	defer os.Remove(f)
 	require.NoError(t, err)
 	require.FileExists(t, f)
-	exists, err = file.Exists(f)
+	exists, err = file.PathExists(f)
 	require.NoError(t, err)
 	require.True(t, exists)
 
 	d, err = makeInvalidDir()
 	require.NoError(t, err)
 	require.NoDirExists(t, d)
-	exists, err = file.Exists(d)
+	exists, err = file.PathExists(d)
 	require.NoError(t, err)
 	require.False(t, exists)
 
 	f, err = makeInvalidFile()
 	require.NoError(t, err)
 	require.NoFileExists(t, f)
-	exists, err = file.Exists(f)
+	exists, err = file.PathExists(f)
 	require.NoError(t, err)
 	require.False(t, exists)
 

@@ -32,7 +32,7 @@ import (
 // If the path exists then (true, nil) is returned.
 // If the path does not exist then (false, nil) is returned.
 // If an error occurred while trying to check if the path exists then (false, err) is returned.
-func Exists(path string) (bool, error) {
+func PathExists(path string) (bool, error) {
 	if _, err := os.Stat(path); err == nil {
 		return true, nil
 	} else if errors.Is(err, os.ErrNotExist) {
@@ -100,7 +100,7 @@ func AbsPaths(paths []string, checkExists bool) ([]string, error) {
 	// Ensure paths exist
 	if checkExists {
 		for _, p := range absPaths {
-			exists, err := Exists(p)
+			exists, err := PathExists(p)
 			if err != nil {
 				return nil, fmt.Errorf("invalid path %q. error: %w", p, err)
 			}
