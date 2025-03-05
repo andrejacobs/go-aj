@@ -1,3 +1,22 @@
+// Copyright (c) 2025 Andre Jacobs
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of
+// this software and associated documentation files (the "Software"), to deal in
+// the Software without restriction, including without limitation the rights to
+// use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+// FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+// IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package file
 
 import (
@@ -57,9 +76,27 @@ func (w *Walker) SetFileExcluder(excluder MatchPathFn) *Walker {
 // if the path should not be walked.
 func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 
-	rErr := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		//AJ### do filtering
-		fnErr := fn(path, d, err)
+	rErr := filepath.WalkDir(root, func(path string, d fs.DirEntry, rcvErr error) error {
+		// Does the directory need to be excluded?
+		exclude, err := w.DirExcluder(path, d)
+		if err != nil {
+			return err
+		}
+		if exclude {
+			return fs.SkipDir
+		}
+
+		// Does the file need to be excluded?
+		exclude, err = w.FileExcluder(path, d)
+		if err != nil {
+			return err
+		}
+		if exclude {
+			return nil
+		}
+
+		// fmt.Printf("walker>>> %q\n", path)
+		fnErr := fn(path, d, rcvErr)
 		return fnErr
 	})
 
@@ -70,14 +107,14 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 // Excluders
 
 // MatchPathFn determines if the path matches a criteria and if so returns true.
-type MatchPathFn func(path string) (bool, error)
+type MatchPathFn func(path string, d fs.DirEntry) (bool, error)
 
 // MatchPathMiddleware specifies the function signature for a wrapping MatchPathFn into a call chain.
-// Similiarly to how http middleware works in popular frameworks.
+// Similarly to how http middleware works in popular frameworks.
 type MatchPathMiddleware func(next MatchPathFn) MatchPathFn
 
 // NeverMatch is a MatchPathFn that will always return false.
-func NeverMatch(path string) (bool, error) {
+func NeverMatch(path string, d fs.DirEntry) (bool, error) {
 	return false, nil
 }
 
