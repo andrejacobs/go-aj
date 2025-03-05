@@ -104,7 +104,7 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 }
 
 //-----------------------------------------------------------------------------
-// Excluders
+// Matchers
 
 // MatchPathFn determines if the path matches a criteria and if so returns true.
 type MatchPathFn func(path string, d fs.DirEntry) (bool, error)
@@ -118,10 +118,15 @@ func NeverMatch(path string, d fs.DirEntry) (bool, error) {
 	return false, nil
 }
 
-// func DefaultDirExcluder(next MatchPathFn) MatchPathFn {
-// 	fmt.Println("DefaultDirExcluder init")
-// 	return func(path string) (bool, error) {
-// 		fmt.Println("DefaultDirExcluder called")
-// 		return next(path)
-// 	}
-// }
+//-----------------------------------------------------------------------------
+// Matcher middleware
+
+// MatchAppleDSStore middleware will match Apple .DS_Store files.
+func MatchAppleDSStore(next MatchPathFn) MatchPathFn {
+	return func(path string, d fs.DirEntry) (bool, error) {
+		if !d.IsDir() && d.Name() == ".DS_Store" {
+			return true, nil
+		}
+		return next(path, d)
+	}
+}

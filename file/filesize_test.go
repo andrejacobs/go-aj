@@ -30,7 +30,7 @@ import (
 func TestCalculateDirSizeShallow(t *testing.T) {
 	size, _, err := file.CalculateDirSizeShallow(tempDir)
 	require.NoError(t, err)
-	assert.Equal(t, int64(60), size)
+	assert.Equal(t, int64(61), size)
 }
 
 func TestCalculateSize(t *testing.T) {
@@ -38,6 +38,6 @@ func TestCalculateSize(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, 2, result.Dirs)
-	assert.Equal(t, 5, result.Files)
-	assert.Equal(t, uint64(90), result.TotalSize)
+	assert.Equal(t, 7, result.Files)
+	assert.Equal(t, uint64(92), result.TotalSize)
 }
