@@ -20,6 +20,7 @@
 package file
 
 import (
+	"fmt"
 	"io/fs"
 	"path/filepath"
 )
@@ -74,9 +75,15 @@ func (w *Walker) SetFileExcluder(excluder MatchPathFn) *Walker {
 //
 // For each file that is found, the FileExcluder will be called to determine
 // if the path should not be walked.
+//
+// The root path will be expanded using [file.ExpandPath] if needed.
 func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
+	expandedRoot, err := ExpandPath(root)
+	if err != nil {
+		return fmt.Errorf("failed to expand the path %q. %w", root, err)
+	}
 
-	rErr := filepath.WalkDir(root, func(path string, d fs.DirEntry, rcvErr error) error {
+	rErr := filepath.WalkDir(expandedRoot, func(path string, d fs.DirEntry, rcvErr error) error {
 		// Did we receive an error?
 		if rcvErr != nil {
 			fnErr := fn(path, d, rcvErr)

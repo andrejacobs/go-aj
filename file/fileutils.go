@@ -26,6 +26,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Check if the path exists.
@@ -131,4 +132,19 @@ func RemoveIfExists(path string) error {
 		}
 	}
 	return nil
+}
+
+// Expand the path to include the user's home directory if the path starts with the suffix ~
+func ExpandPath(path string) (string, error) {
+	if strings.HasPrefix(path, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		if path == "~" {
+			return home, nil
+		}
+		return filepath.Join(home, path[2:]), nil
+	}
+	return path, nil
 }

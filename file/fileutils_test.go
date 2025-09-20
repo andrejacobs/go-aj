@@ -20,6 +20,7 @@
 package file_test
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -119,6 +120,25 @@ func TestRemoveIfExists(t *testing.T) {
 	require.NoError(t, os.Remove(f.Name()))
 
 	assert.NoError(t, file.RemoveIfExists(f.Name()))
+}
+
+func TestExpandPath(t *testing.T) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	r, err := file.ExpandPath("/dev/null")
+	require.NoError(t, err)
+	assert.Equal(t, "/dev/null", r)
+
+	r, err = file.ExpandPath("~/temp/some-file.txt")
+	require.NoError(t, err)
+	assert.Equal(t, fmt.Sprintf("%s/temp/some-file.txt", home), r)
+
+	r, err = file.ExpandPath("~")
+	require.NoError(t, err)
+	assert.Equal(t, home, r)
 }
 
 //-----------------------------------------------------------------------------
