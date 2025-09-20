@@ -163,3 +163,17 @@ func expectedFilepathWalk(path string) ([]string, error) {
 	slices.Sort(expected)
 	return expected, nil
 }
+
+func TestWalkerErr(t *testing.T) {
+	var fn fs.WalkDirFunc = func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	w := file.NewWalker()
+	err := w.Walk("/does-not-exist", fn)
+	var expErr *fs.PathError
+	require.ErrorAs(t, err, &expErr)
+}

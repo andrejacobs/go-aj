@@ -77,6 +77,12 @@ func (w *Walker) SetFileExcluder(excluder MatchPathFn) *Walker {
 func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 
 	rErr := filepath.WalkDir(root, func(path string, d fs.DirEntry, rcvErr error) error {
+		// Did we receive an error?
+		if rcvErr != nil {
+			fnErr := fn(path, d, rcvErr)
+			return fnErr
+		}
+
 		// Does the directory need to be excluded?
 		exclude, err := w.DirExcluder(path, d)
 		if err != nil {
@@ -96,7 +102,7 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 		}
 
 		// fmt.Printf("walker>>> %q\n", path)
-		fnErr := fn(path, d, rcvErr)
+		fnErr := fn(path, d, nil)
 		return fnErr
 	})
 
