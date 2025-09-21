@@ -134,7 +134,7 @@ func RemoveIfExists(path string) error {
 	return nil
 }
 
-// Expand the path to include the user's home directory if the path starts with the suffix ~
+// Expand the path to include the user's home directory if the path starts with the suffix ~.
 func ExpandPath(path string) (string, error) {
 	if strings.HasPrefix(path, "~") {
 		home, err := os.UserHomeDir()
