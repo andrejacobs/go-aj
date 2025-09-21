@@ -20,15 +20,34 @@
 # Linting configuration for golangci-lint
 # See https://golangci-lint.run/usage/configuration/ for details
 
-linters:
-    enable:
-        - gosec
-        - godot
-        - misspell
-        - stylecheck
-linters-settings:
-    gosec:
-        excludes:
-            - G115 # Potential integer overflow when converting between integer types
+version: "2"
 run:
-    tests: false
+  tests: false
+linters:
+  enable:
+    - godot
+    - gosec
+    - misspell
+    - staticcheck
+  settings:
+    gosec:
+      excludes:
+        - G115 # Potential integer overflow when converting between integer types
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
