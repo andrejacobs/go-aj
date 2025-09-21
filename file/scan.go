@@ -68,5 +68,5 @@ func IsDirEntryWithInfoEqual(a os.DirEntry, b os.DirEntry) (bool, error) {
 
 	return (ai.Size() == bi.Size()) &&
 		(ai.Mode() == bi.Mode()) &&
-		(ai.ModTime() == bi.ModTime()), nil
+		(ai.ModTime().Equal(bi.ModTime())), nil
 }
