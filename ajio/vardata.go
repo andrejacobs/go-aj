@@ -43,61 +43,61 @@ type VariableDataFixedLen[S constraints.Unsigned] struct {
 }
 
 // Create a new VariableData instance that will use 1 byte for the data prefix size.
-func NewVariableDataUint8() *VariableDataFixedLen[uint8] {
-	return &VariableDataFixedLen[uint8]{size: 1, maxValue: math.MaxUint8, order: binary.LittleEndian, write: writeUint8, read: readUint8}
+func NewVariableDataUint8() VariableDataFixedLen[uint8] {
+	return VariableDataFixedLen[uint8]{size: 1, maxValue: math.MaxUint8, order: binary.LittleEndian, write: writeUint8, read: readUint8}
 }
 
 // Create a new VariableData instance that will use 2 bytes for the data prefix size.
-func NewVariableDataUint16() *VariableDataFixedLen[uint16] {
-	return &VariableDataFixedLen[uint16]{size: 2, maxValue: math.MaxUint16, order: binary.LittleEndian, write: writeUint16, read: readUint16}
+func NewVariableDataUint16() VariableDataFixedLen[uint16] {
+	return VariableDataFixedLen[uint16]{size: 2, maxValue: math.MaxUint16, order: binary.LittleEndian, write: writeUint16, read: readUint16}
 }
 
 // Create a new VariableData instance that will use 4 bytes for the data prefix size.
-func NewVariableDataUint32() *VariableDataFixedLen[uint32] {
-	return &VariableDataFixedLen[uint32]{size: 4, maxValue: math.MaxUint32, order: binary.LittleEndian, write: writeUint32, read: readUint32}
+func NewVariableDataUint32() VariableDataFixedLen[uint32] {
+	return VariableDataFixedLen[uint32]{size: 4, maxValue: math.MaxUint32, order: binary.LittleEndian, write: writeUint32, read: readUint32}
 }
 
 // Create a new VariableData instance that will use 8 bytes for the data prefix size.
-func NewVariableDataUint64() *VariableDataFixedLen[uint64] {
-	return &VariableDataFixedLen[uint64]{size: 8, maxValue: math.MaxUint64, order: binary.LittleEndian, write: writeUint64, read: readUint64}
+func NewVariableDataUint64() VariableDataFixedLen[uint64] {
+	return VariableDataFixedLen[uint64]{size: 8, maxValue: math.MaxUint64, order: binary.LittleEndian, write: writeUint64, read: readUint64}
 }
 
 // Use little endianess.
-func (v *VariableDataFixedLen[S]) LittleEndian() *VariableDataFixedLen[S] {
+func (v VariableDataFixedLen[S]) LittleEndian() VariableDataFixedLen[S] {
 	v.order = binary.LittleEndian
 	return v
 }
 
 // Use big endianess.
-func (v *VariableDataFixedLen[S]) BigEndian() *VariableDataFixedLen[S] {
+func (v VariableDataFixedLen[S]) BigEndian() VariableDataFixedLen[S] {
 	v.order = binary.BigEndian
 	return v
 }
 
 // Use the native platform's endianess. Not recommended.
-func (v *VariableDataFixedLen[S]) NativeEndian() *VariableDataFixedLen[S] {
+func (v VariableDataFixedLen[S]) NativeEndian() VariableDataFixedLen[S] {
 	v.order = binary.NativeEndian
 	return v
 }
 
 // Return the maximum number of bytes that can be read or written to for the data prefix.
-func (v *VariableDataFixedLen[S]) MaxSize() S {
+func (v VariableDataFixedLen[S]) MaxSize() S {
 	return v.maxValue
 }
 
 // The number of bytes that will be used to write the data prefix. e.g. Uint16 will use 2 bytes.
-func (v *VariableDataFixedLen[S]) PrefixSize() int {
+func (v VariableDataFixedLen[S]) PrefixSize() int {
 	return v.size
 }
 
 // Return the byte order (endianess) used.
-func (v *VariableDataFixedLen[S]) ByteOrder() binary.ByteOrder {
+func (v VariableDataFixedLen[S]) ByteOrder() binary.ByteOrder {
 	return v.order
 }
 
 // Write the size of the data (i.e len(data)) followed by that data itself.
 // Returns the number of bytes written including the size of the prefix.
-func (v *VariableDataFixedLen[S]) Write(w io.Writer, data []byte) (int, error) {
+func (v VariableDataFixedLen[S]) Write(w io.Writer, data []byte) (int, error) {
 	dataLen := len(data)
 	if uint64(dataLen) > uint64(v.maxValue) {
 		return 0, fmt.Errorf("failed to write data of size %d. maximum size allowed is %d", dataLen, v.maxValue)
@@ -109,12 +109,12 @@ func (v *VariableDataFixedLen[S]) Write(w io.Writer, data []byte) (int, error) {
 // Read the size of the data followed by that amount of bytes into the provided buffer.
 // A new buffer will be allocated if the provided one is not large enough to hold the data.
 // Returns the buffer and the number of bytes read including the size of the prefix.
-func (v *VariableDataFixedLen[S]) Read(r io.Reader, buffer []byte) ([]byte, int, error) {
+func (v VariableDataFixedLen[S]) Read(r io.Reader, buffer []byte) ([]byte, int, error) {
 	return v.read(r, buffer, v.order)
 }
 
 // Write a string using the generic Write method to prefix the length of the string first and reducing allocs.
-func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, error) {
+func (v VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, error) {
 	dataLen := len(data)
 	if uint64(dataLen) > uint64(v.maxValue) {
 		return 0, fmt.Errorf("failed to write string of size %d. maximum size allowed is %d", dataLen, v.maxValue)
@@ -145,7 +145,7 @@ func (v *VariableDataFixedLen[S]) WriteString(w io.Writer, data string) (int, er
 // Read a string.
 // NOTE: If you are going to be reading a lot of strings then it is better to use the generic Read method
 // and passing in a pre-allocated []byte.
-func (v *VariableDataFixedLen[S]) ReadString(r io.Reader) (string, int, error) {
+func (v VariableDataFixedLen[S]) ReadString(r io.Reader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to read a string. %w", err)
@@ -165,18 +165,18 @@ type VariableData struct {
 }
 
 // Create a new VariableDataVarInt instance that will use between 1 and 10 bytes for the data prefix size.
-func NewVariableData() *VariableData {
-	return &VariableData{order: binary.LittleEndian}
+func NewVariableData() VariableData {
+	return VariableData{order: binary.LittleEndian}
 }
 
 // Return the byte order (endianess) used.
-func (v *VariableData) ByteOrder() binary.ByteOrder {
+func (v VariableData) ByteOrder() binary.ByteOrder {
 	return v.order
 }
 
 // Write the size of the data (i.e len(data)) followed by that data itself.
 // Returns the number of bytes written including the size of the prefix.
-func (v *VariableData) Write(w io.Writer, data []byte) (int, error) {
+func (v VariableData) Write(w io.Writer, data []byte) (int, error) {
 	dataLen := len(data)
 
 	varintBuf := make([]byte, binary.MaxVarintLen64)
@@ -194,7 +194,7 @@ func (v *VariableData) Write(w io.Writer, data []byte) (int, error) {
 // Read the size of the data followed by that amount of bytes into the provided buffer.
 // A new buffer will be allocated if the provided one is not large enough to hold the data.
 // Returns the buffer and the number of bytes read including the size of the prefix.
-func (v *VariableData) Read(r MultiByteReader, buffer []byte) ([]byte, int, error) {
+func (v VariableData) Read(r MultiByteReader, buffer []byte) ([]byte, int, error) {
 	dataLen, varintSize, err := v.readUvarint(r)
 	if err != nil {
 		return nil, varintSize, err
@@ -215,7 +215,7 @@ func (v *VariableData) Read(r MultiByteReader, buffer []byte) ([]byte, int, erro
 }
 
 // Write a string using the generic Write method to prefix the length of the string first and reducing allocs.
-func (v *VariableData) WriteString(w io.Writer, data string) (int, error) {
+func (v VariableData) WriteString(w io.Writer, data string) (int, error) {
 	dataLen := len(data)
 
 	varintBuf := make([]byte, binary.MaxVarintLen64)
@@ -233,7 +233,7 @@ func (v *VariableData) WriteString(w io.Writer, data string) (int, error) {
 // Read a string.
 // NOTE: If you are going to be reading a lot of strings then it is better to use the generic Read method
 // and passing in a pre-allocated []byte.
-func (v *VariableData) ReadString(r MultiByteReader) (string, int, error) {
+func (v VariableData) ReadString(r MultiByteReader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to read a string. %w", err)
@@ -247,7 +247,7 @@ func (v *VariableData) ReadString(r MultiByteReader) (string, int, error) {
 // >>> The error is EOF only if no bytes were read.
 // >>> If an EOF happens after reading some but not all the bytes,
 // >>> ReadUvarint returns io.ErrUnexpectedEOF.
-func (v *VariableData) readUvarint(r io.ByteReader) (uint64, int, error) {
+func (v VariableData) readUvarint(r io.ByteReader) (uint64, int, error) {
 	var x uint64
 	var s uint
 	var i int
