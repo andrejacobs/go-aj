@@ -22,6 +22,8 @@ package ajio
 import (
 	"io"
 	"os"
+
+	"github.com/andrejacobs/go-aj/ajmath"
 )
 
 // Keep track of the offset within an io.Reader source.
@@ -29,7 +31,7 @@ type TrackedOffsetReader interface {
 	io.Reader
 
 	// Return the current offset
-	Offset() int64
+	Offset() uint64
 }
 
 // Keep track of the offset within an io.Writer source.
@@ -37,7 +39,7 @@ type TrackedOffsetWriter interface {
 	io.Writer
 
 	// Return the current offset
-	Offset() int64
+	Offset() uint64
 }
 
 // TrackedOffset keeps track of the current offset within file like objects without requiring to make calls to Seek.
@@ -50,7 +52,7 @@ type TrackedOffset interface {
 	io.WriterAt
 
 	// Return the current offset
-	Offset() int64
+	Offset() uint64
 
 	// Ensure the current offset matches the underlying source. In the case of a file like object this should involve a call to Seek.
 	SyncOffset() error
@@ -63,17 +65,18 @@ type MultiByteTrackedOffsetReader interface {
 }
 
 //-----------------------------------------------------------------------------
+// TrackedOffsetReader
 
 type reader struct {
 	rd     io.Reader
-	offset int64
+	offset uint64
 }
 
 // Create a new TrackedOffsetReader that will keep track of the offset within the source io.Reader object.
-func NewTrackedOffsetReader(rd io.Reader, baseOffset int64) TrackedOffsetReader {
+func NewTrackedOffsetReader(rd io.Reader, baseOffset uint64) TrackedOffsetReader {
 	t := &reader{
 		rd:     rd,
-		offset: int64(baseOffset),
+		offset: baseOffset,
 	}
 	return t
 }
@@ -85,28 +88,33 @@ func (t *reader) Read(p []byte) (int, error) {
 		return n, err
 	}
 
-	t.offset += int64(n)
+	newOffset, err := ajmath.Add64(t.offset, uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	t.offset = newOffset
 
 	return n, nil
 }
 
 // TrackedOffsetReader implementation.
-func (t *reader) Offset() int64 {
+func (t *reader) Offset() uint64 {
 	return t.offset
 }
 
 //-----------------------------------------------------------------------------
+// TrackedOffsetWriter
 
 type writer struct {
 	wd     io.Writer
-	offset int64
+	offset uint64
 }
 
 // Create a new TrackedOffsetWriter that will keep track of the offset within the source io.Writer object.
-func NewTrackedOffsetWriter(wd io.Writer, baseOffset int64) TrackedOffsetWriter {
+func NewTrackedOffsetWriter(wd io.Writer, baseOffset uint64) TrackedOffsetWriter {
 	t := &writer{
 		wd:     wd,
-		offset: int64(baseOffset),
+		offset: uint64(baseOffset),
 	}
 	return t
 }
@@ -118,22 +126,27 @@ func (t *writer) Write(p []byte) (int, error) {
 		return n, err
 	}
 
-	t.offset += int64(n)
+	newOffset, err := ajmath.Add64(t.offset, uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	t.offset = newOffset
 
 	return n, nil
 }
 
 // TrackedOffsetWriter implementation.
-func (t *writer) Offset() int64 {
+func (t *writer) Offset() uint64 {
 	return t.offset
 }
 
 //-----------------------------------------------------------------------------
+// TrackedOffset file
 
 // Wrap os.File to keep track of the current offset without needing to make constant calls to Seek which involves syscall Lseek.
 type fileTrackedOffset struct {
 	f      *os.File
-	offset int64
+	offset uint64
 }
 
 // Create a new TrackedOffset that will keep track of the file's offset.
@@ -157,7 +170,11 @@ func (t *fileTrackedOffset) Read(p []byte) (int, error) {
 		return n, err
 	}
 
-	t.offset += int64(n)
+	newOffset, err := ajmath.Add64(t.offset, uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	t.offset = newOffset
 
 	return n, nil
 }
@@ -169,7 +186,11 @@ func (t *fileTrackedOffset) Write(p []byte) (int, error) {
 		return n, err
 	}
 
-	t.offset += int64(n)
+	newOffset, err := ajmath.Add64(t.offset, uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	t.offset = newOffset
 
 	return n, nil
 }
@@ -180,7 +201,7 @@ func (t *fileTrackedOffset) Seek(offset int64, whence int) (int64, error) {
 	if err != nil {
 		return newOffset, err
 	}
-	t.offset = newOffset
+	t.offset = uint64(newOffset)
 	return newOffset, err
 }
 
@@ -191,7 +212,11 @@ func (t *fileTrackedOffset) ReadAt(p []byte, off int64) (int, error) {
 		return n, err
 	}
 
-	t.offset = off + int64(n)
+	newOffset, err := ajmath.Add64(uint64(off), uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	t.offset = newOffset
 
 	return n, nil
 }
@@ -203,7 +228,11 @@ func (t *fileTrackedOffset) WriteAt(p []byte, off int64) (int, error) {
 		return n, err
 	}
 
-	t.offset = off + int64(n)
+	newOffset, err := ajmath.Add64(uint64(off), uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	t.offset = newOffset
 
 	return n, nil
 }
@@ -211,7 +240,7 @@ func (t *fileTrackedOffset) WriteAt(p []byte, off int64) (int, error) {
 //-----------------------------------------------------------------------------
 
 // TrackedOffset implementation.
-func (t *fileTrackedOffset) Offset() int64 {
+func (t *fileTrackedOffset) Offset() uint64 {
 	return t.offset
 }
 
@@ -223,19 +252,20 @@ func (t *fileTrackedOffset) SyncOffset() error {
 		return err
 	}
 
-	t.offset = offset
+	t.offset = uint64(offset)
 	return nil
 }
 
 //-----------------------------------------------------------------------------
+// MultiByteTrackedOffsetReader
 
 type wrappedMBReader struct {
 	rd     MultiByteReader
-	offset int64
+	offset uint64
 }
 
 // Create a new bufio.Reader that also supports being able to do io.Seeker.
-func NewTrackedOffsetReaderMultiByte(rd MultiByteReader, baseOffset int64) MultiByteTrackedOffsetReader {
+func NewTrackedOffsetReaderMultiByte(rd MultiByteReader, baseOffset uint64) MultiByteTrackedOffsetReader {
 	return &wrappedMBReader{
 		rd:     rd,
 		offset: baseOffset,
@@ -248,7 +278,11 @@ func (w *wrappedMBReader) Read(p []byte) (int, error) {
 		return n, err
 	}
 
-	w.offset += int64(n)
+	newOffset, err := ajmath.Add64(w.offset, uint64(n))
+	if err != nil {
+		return 0, err
+	}
+	w.offset = newOffset
 
 	return n, nil
 }
@@ -258,10 +292,18 @@ func (w *wrappedMBReader) ReadByte() (byte, error) {
 	if err != nil {
 		return b, err
 	}
-	w.offset++
+
+	newOffset, err := ajmath.Add64(w.offset, uint64(1))
+	if err != nil {
+		return 0, err
+	}
+	w.offset = newOffset
+
 	return b, nil
 }
 
-func (w *wrappedMBReader) Offset() int64 {
+func (w *wrappedMBReader) Offset() uint64 {
 	return w.offset
 }
+
+//-----------------------------------------------------------------------------

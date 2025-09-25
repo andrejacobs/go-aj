@@ -22,11 +22,13 @@ package ajio_test
 import (
 	"bufio"
 	"io"
+	"math"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/andrejacobs/go-aj/ajio"
+	"github.com/andrejacobs/go-aj/ajmath"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +40,7 @@ func TestTrackedOffsetReader(t *testing.T) {
 	sr := strings.NewReader(text)
 	br := bufio.NewReader(sr)
 
-	baseOffset := int64(42)
+	baseOffset := uint64(42)
 	tr := ajio.NewTrackedOffsetReader(br, baseOffset)
 	assert.Equal(t, baseOffset, tr.Offset())
 
@@ -46,14 +48,28 @@ func TestTrackedOffsetReader(t *testing.T) {
 	for i := 0; i < len(text)/4; i++ {
 		_, err := tr.Read(buffer)
 		require.NoError(t, err)
-		assert.Equal(t, baseOffset+int64((i+1)*4), tr.Offset())
+		assert.Equal(t, baseOffset+uint64((i+1)*4), tr.Offset())
 	}
+}
+
+func TestTrackedOffsetReaderOverflow(t *testing.T) {
+	text := "The quick brown fox jumped over the lazy dog!"
+	sr := strings.NewReader(text)
+	br := bufio.NewReader(sr)
+
+	baseOffset := uint64(math.MaxUint64 - 2)
+	tr := ajio.NewTrackedOffsetReader(br, uint64(baseOffset))
+	assert.Equal(t, baseOffset, tr.Offset())
+
+	buffer := make([]byte, 4)
+	_, err := tr.Read(buffer)
+	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
 }
 
 //-----------------------------------------------------------------------------
 
 func TestTrackedOffsetWriter(t *testing.T) {
-	baseOffset := int64(42)
+	baseOffset := uint64(42)
 	tw := ajio.NewTrackedOffsetWriter(io.Discard, baseOffset)
 	assert.Equal(t, baseOffset, tw.Offset())
 
@@ -61,7 +77,17 @@ func TestTrackedOffsetWriter(t *testing.T) {
 	c, err := tw.Write(data)
 	require.NoError(t, err)
 	assert.Equal(t, len(data), c)
-	assert.Equal(t, baseOffset+int64(len(data)), tw.Offset())
+	assert.Equal(t, baseOffset+uint64(len(data)), tw.Offset())
+}
+
+func TestTrackedOffsetWriterOverflow(t *testing.T) {
+	baseOffset := uint64(math.MaxUint64 - 4)
+	tw := ajio.NewTrackedOffsetWriter(io.Discard, baseOffset)
+	assert.Equal(t, baseOffset, tw.Offset())
+
+	data := []byte("The quick brown fox jumped over the lazy dog!")
+	_, err := tw.Write(data)
+	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
 }
 
 //-----------------------------------------------------------------------------
@@ -72,13 +98,13 @@ func TestMultiByteTrackedOffsetReader(t *testing.T) {
 	br := bufio.NewReader(sr)
 
 	tr := ajio.NewTrackedOffsetReaderMultiByte(br, 0)
-	assert.Equal(t, int64(0), tr.Offset())
+	assert.Equal(t, uint64(0), tr.Offset())
 
 	buffer := make([]byte, 4)
 	for i := 0; i < len(text)/4; i++ {
 		_, err := tr.Read(buffer)
 		require.NoError(t, err)
-		assert.Equal(t, int64((i+1)*4), tr.Offset())
+		assert.Equal(t, uint64((i+1)*4), tr.Offset())
 	}
 
 	sr = strings.NewReader(text)
@@ -88,7 +114,7 @@ func TestMultiByteTrackedOffsetReader(t *testing.T) {
 	}
 
 	tr = ajio.NewTrackedOffsetReaderMultiByte(br, 4)
-	assert.Equal(t, int64(4), tr.Offset())
+	assert.Equal(t, uint64(4), tr.Offset())
 
 	b, err := tr.ReadByte()
 	require.NoError(t, err)
@@ -98,12 +124,34 @@ func TestMultiByteTrackedOffsetReader(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, byte('u'), b)
 
-	assert.Equal(t, int64(6), tr.Offset())
+	assert.Equal(t, uint64(6), tr.Offset())
+}
+
+func TestMultiByteTrackedOffsetReaderOverflow(t *testing.T) {
+	text := "The quick brown fox jumped over the lazy dog!"
+	sr := strings.NewReader(text)
+	br := bufio.NewReader(sr)
+
+	baseOffset := uint64(math.MaxUint64 - 2)
+	tr := ajio.NewTrackedOffsetReaderMultiByte(br, baseOffset)
+	assert.Equal(t, baseOffset, tr.Offset())
+
+	buffer := make([]byte, 4)
+	_, err := tr.Read(buffer)
+	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+
+	_, err = tr.ReadByte()
+	assert.NoError(t, err)
+	_, err = tr.ReadByte()
+	assert.NoError(t, err)
+
+	_, err = tr.ReadByte()
+	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
 }
 
 //-----------------------------------------------------------------------------
 
-func TestNewFileTrackedOffset(t *testing.T) {
+func TestNewTrackedOffsetFile(t *testing.T) {
 	tempFile, err := createTempFile(10)
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
@@ -115,10 +163,10 @@ func TestNewFileTrackedOffset(t *testing.T) {
 	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 	offset := tracker.Offset()
-	assert.Equal(t, int64(0), offset)
+	assert.Equal(t, uint64(0), offset)
 }
 
-func TestNewFileTrackedOffsetWithExistingOffset(t *testing.T) {
+func TestNewTrackedOffsetFileWithExistingOffset(t *testing.T) {
 	tempFile, err := createTempFile(10)
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
@@ -132,7 +180,7 @@ func TestNewFileTrackedOffsetWithExistingOffset(t *testing.T) {
 	tracker, err := ajio.NewTrackedOffsetFile(f)
 	require.NoError(t, err)
 	offset := tracker.Offset()
-	assert.Equal(t, expectedOffset, offset)
+	assert.Equal(t, uint64(expectedOffset), offset)
 }
 
 func TestFileTrackedOffsetSeek(t *testing.T) {
@@ -149,7 +197,7 @@ func TestFileTrackedOffsetSeek(t *testing.T) {
 
 	expectedOffset, err := tracker.Seek(4, io.SeekStart)
 	require.NoError(t, err)
-	assert.Equal(t, expectedOffset, tracker.Offset())
+	assert.Equal(t, uint64(expectedOffset), tracker.Offset())
 	assert.Equal(t, int64(4), expectedOffset)
 
 	actualOffset, err := f.Seek(0, io.SeekCurrent)
@@ -158,7 +206,7 @@ func TestFileTrackedOffsetSeek(t *testing.T) {
 
 	expectedOffset, err = tracker.Seek(-2, io.SeekCurrent)
 	require.NoError(t, err)
-	assert.Equal(t, expectedOffset, tracker.Offset())
+	assert.Equal(t, uint64(expectedOffset), tracker.Offset())
 	assert.Equal(t, int64(2), expectedOffset)
 
 	actualOffset, err = f.Seek(0, io.SeekCurrent)
@@ -167,7 +215,7 @@ func TestFileTrackedOffsetSeek(t *testing.T) {
 
 	expectedOffset, err = tracker.Seek(-3, io.SeekEnd)
 	require.NoError(t, err)
-	assert.Equal(t, expectedOffset, tracker.Offset())
+	assert.Equal(t, uint64(expectedOffset), tracker.Offset())
 	assert.Equal(t, int64(7), expectedOffset)
 
 	actualOffset, err = f.Seek(0, io.SeekCurrent)
@@ -194,14 +242,14 @@ func TestFileTrackedOffsetRead(t *testing.T) {
 		rc, err := tracker.Read(buffer)
 		require.NoError(t, err)
 		assert.Equal(t, 2, rc)
-		assert.Equal(t, int64(i+2), tracker.Offset())
+		assert.Equal(t, uint64(i+2), tracker.Offset())
 	}
 
 	_, err = tracker.Seek(4, io.SeekStart)
 	require.NoError(t, err)
 	_, err = tracker.Read(buffer)
 	require.NoError(t, err)
-	assert.Equal(t, int64(6), tracker.Offset())
+	assert.Equal(t, uint64(6), tracker.Offset())
 }
 
 func TestFileTrackedOffsetWrite(t *testing.T) {
@@ -223,14 +271,14 @@ func TestFileTrackedOffsetWrite(t *testing.T) {
 		wc, err := tracker.Write(buffer)
 		require.NoError(t, err)
 		assert.Equal(t, 2, wc)
-		assert.Equal(t, int64(i+2), tracker.Offset())
+		assert.Equal(t, uint64(i+2), tracker.Offset())
 	}
 
 	_, err = tracker.Seek(4, io.SeekStart)
 	require.NoError(t, err)
 	_, err = tracker.Write(buffer)
 	require.NoError(t, err)
-	assert.Equal(t, int64(6), tracker.Offset())
+	assert.Equal(t, uint64(6), tracker.Offset())
 }
 
 func TestFileTrackedOffsetSyncOffset(t *testing.T) {
@@ -254,7 +302,7 @@ func TestFileTrackedOffsetSyncOffset(t *testing.T) {
 	tracker.SyncOffset()
 	actualOffset, err = f.Seek(0, io.SeekCurrent)
 	require.NoError(t, err)
-	assert.Equal(t, actualOffset, tracker.Offset())
+	assert.Equal(t, uint64(actualOffset), tracker.Offset())
 }
 
 func TestFileTrackedOffsetReaderAtWriterAt(t *testing.T) {
@@ -274,13 +322,13 @@ func TestFileTrackedOffsetReaderAtWriterAt(t *testing.T) {
 	wc, err := tracker.WriteAt(expected, 4)
 	require.NoError(t, err)
 	assert.Equal(t, 2, wc)
-	assert.Equal(t, int64(6), tracker.Offset())
+	assert.Equal(t, uint64(6), tracker.Offset())
 
 	buffer := make([]byte, 2)
 	rc, err := tracker.ReadAt(buffer, 4)
 	require.NoError(t, err)
 	assert.Equal(t, 2, rc)
-	assert.Equal(t, int64(6), tracker.Offset())
+	assert.Equal(t, uint64(6), tracker.Offset())
 
 	assert.Equal(t, expected, buffer)
 }
