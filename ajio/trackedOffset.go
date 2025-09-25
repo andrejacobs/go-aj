@@ -114,7 +114,7 @@ type writer struct {
 func NewTrackedOffsetWriter(wd io.Writer, baseOffset uint64) TrackedOffsetWriter {
 	t := &writer{
 		wd:     wd,
-		offset: uint64(baseOffset),
+		offset: baseOffset,
 	}
 	return t
 }
@@ -201,8 +201,13 @@ func (t *fileTrackedOffset) Seek(offset int64, whence int) (int64, error) {
 	if err != nil {
 		return newOffset, err
 	}
-	t.offset = uint64(newOffset)
-	return newOffset, err
+
+	t.offset, err = ajmath.Int64ToUint64(newOffset)
+	if err != nil {
+		return newOffset, err
+	}
+
+	return newOffset, nil
 }
 
 // ReaderAt implementation.
@@ -252,7 +257,11 @@ func (t *fileTrackedOffset) SyncOffset() error {
 		return err
 	}
 
-	t.offset = uint64(offset)
+	t.offset, err = ajmath.Int64ToUint64(offset)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
