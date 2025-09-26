@@ -22,14 +22,6 @@ const (
 	DefaultAlgo = AlgoSHA256 // The default hash algorithm is SHA-256
 )
 
-var (
-	// Used to write out zeroes for an uncalculated hash wihtout doing an alloc
-	// NOTE: Don't create duplicate buffers, e.g. next 64 byte algo can just point to the same SHA512 one
-	AlgoSHA1Zero   = make([]byte, sha1.Size)   // 20 bytes
-	AlgoSHA256Zero = make([]byte, sha256.Size) // 32 bytes
-	AlgoSHA512Zero = make([]byte, sha512.Size) // 64 bytes
-)
-
 // Return the size of bytes that a digest for the hashing algorithm uses.
 func (h Algo) Size() int {
 	return h.cryptoHash().Size()
@@ -62,6 +54,34 @@ func (h Algo) String() string {
 	}
 }
 
+// Return the hasher to be used for the algorithm.
+func (h Algo) Hasher() hash.Hash {
+	switch h {
+	case AlgoSHA1:
+		return sha1.New()
+	case AlgoSHA256:
+		return sha256.New()
+	case AlgoSHA512:
+		return sha512.New()
+	default:
+		panic("unknown hashing algorithm")
+	}
+}
+
+// Return a slice of bytes that is of the correct digest size and contains only zeroes.
+func (h Algo) ZeroValue() []byte {
+	switch h {
+	case AlgoSHA1:
+		return algoSHA1Zero
+	case AlgoSHA256:
+		return algoSHA256Zero
+	case AlgoSHA512:
+		return algoSHA512Zero
+	default:
+		panic("unknown hashing algorithm")
+	}
+}
+
 // Return the hash (as a string) for when zero bytes are hashed.
 func (h Algo) HashedStringForZeroBytes() string {
 	switch h {
@@ -79,20 +99,6 @@ func (h Algo) HashedStringForZeroBytes() string {
 	}
 }
 
-// Return the hasher to be used for the algorithm.
-func (h Algo) Hasher() hash.Hash {
-	switch h {
-	case AlgoSHA1:
-		return sha1.New()
-	case AlgoSHA256:
-		return sha256.New()
-	case AlgoSHA512:
-		return sha512.New()
-	default:
-		panic("unknown hashing algorithm")
-	}
-}
-
 // Return true if all the bytes in the slice are zero.
 func AllZeroBytes(buf []byte) bool {
 	for _, b := range buf {
@@ -102,3 +108,11 @@ func AllZeroBytes(buf []byte) bool {
 	}
 	return true
 }
+
+var (
+	// Used to write out zeroes for an uncalculated hash wihtout doing an alloc
+	// NOTE: Don't create duplicate buffers, e.g. next 64 byte algo can just point to the same SHA512 one
+	algoSHA1Zero   = make([]byte, sha1.Size)   // 20 bytes
+	algoSHA256Zero = make([]byte, sha256.Size) // 32 bytes
+	algoSHA512Zero = make([]byte, sha512.Size) // 64 bytes
+)

@@ -24,6 +24,15 @@ func TestHashAssumptions(t *testing.T) {
 	assert.Equal(t, "SHA-256", ajhash.AlgoSHA256.String())
 	assert.Equal(t, "SHA-512", ajhash.AlgoSHA512.String())
 
+	assert.Equal(t, ajhash.AlgoSHA1.Size(), len(ajhash.AlgoSHA1.ZeroValue()))
+	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA1.ZeroValue()))
+
+	assert.Equal(t, ajhash.AlgoSHA256.Size(), len(ajhash.AlgoSHA256.ZeroValue()))
+	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA256.ZeroValue()))
+
+	assert.Equal(t, ajhash.AlgoSHA512.Size(), len(ajhash.AlgoSHA512.ZeroValue()))
+	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA512.ZeroValue()))
+
 	// shasum -a 1 /dev/null
 	assert.Equal(t, "da39a3ee5e6b4b0d3255bfef95601890afd80709", ajhash.AlgoSHA1.HashedStringForZeroBytes())
 	// shasum -a 256 /dev/null
@@ -36,6 +45,7 @@ func TestHashAssumptions(t *testing.T) {
 	assert.Panics(t, func() { invalid.Size() })
 	assert.Equal(t, "", invalid.HashedStringForZeroBytes())
 	assert.Panics(t, func() { invalid.Hasher() })
+	assert.Panics(t, func() { invalid.ZeroValue() })
 }
 
 func TestSHA1(t *testing.T) {
