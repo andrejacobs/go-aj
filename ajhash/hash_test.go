@@ -2,10 +2,15 @@ package ajhash_test
 
 import (
 	"crypto"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
 	"testing"
 
 	"github.com/andrejacobs/go-aj/ajhash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHashAssumptions(t *testing.T) {
@@ -31,6 +36,63 @@ func TestHashAssumptions(t *testing.T) {
 	assert.Panics(t, func() { invalid.Size() })
 	assert.Equal(t, "", invalid.HashedStringForZeroBytes())
 	assert.Panics(t, func() { invalid.Hasher() })
+}
+
+func TestSHA1(t *testing.T) {
+	input := "The quick brown fox jumped over the lazy dog"
+
+	hasher := ajhash.AlgoSHA1.Hasher()
+	_, err := hasher.Write([]byte(input))
+	assert.NoError(t, err)
+
+	expHasher := sha1.New()
+	_, err = expHasher.Write([]byte(input))
+	assert.NoError(t, err)
+
+	assert.Equal(t, expHasher.Sum(nil), hasher.Sum(nil))
+
+	// echo -n "The quick brown fox jumped over the lazy dog" | shasum -a 1 -
+	expHash, err := hex.DecodeString("f6513640f3045e9768b239785625caa6a2588842")
+	require.NoError(t, err)
+	assert.Equal(t, expHash, hasher.Sum(nil))
+}
+
+func TestSHA256(t *testing.T) {
+	input := "The quick brown fox jumped over the lazy dog"
+
+	hasher := ajhash.AlgoSHA256.Hasher()
+	_, err := hasher.Write([]byte(input))
+	assert.NoError(t, err)
+
+	expHasher := sha256.New()
+	_, err = expHasher.Write([]byte(input))
+	assert.NoError(t, err)
+
+	assert.Equal(t, expHasher.Sum(nil), hasher.Sum(nil))
+
+	// echo -n "The quick brown fox jumped over the lazy dog" | shasum -a 256 -
+	expHash, err := hex.DecodeString("7d38b5cd25a2baf85ad3bb5b9311383e671a8a142eb302b324d4a5fba8748c69")
+	require.NoError(t, err)
+	assert.Equal(t, expHash, hasher.Sum(nil))
+}
+
+func TestSHA512(t *testing.T) {
+	input := "The quick brown fox jumped over the lazy dog"
+
+	hasher := ajhash.AlgoSHA512.Hasher()
+	_, err := hasher.Write([]byte(input))
+	assert.NoError(t, err)
+
+	expHasher := sha512.New()
+	_, err = expHasher.Write([]byte(input))
+	assert.NoError(t, err)
+
+	assert.Equal(t, expHasher.Sum(nil), hasher.Sum(nil))
+
+	// echo -n "The quick brown fox jumped over the lazy dog" | shasum -a 512 -
+	expHash, err := hex.DecodeString("db25330cfa5d14eaadf11a6263371cfa0e70fcd7a63a433b91f2300ca25d45b66a7b50d2f6747995c8fa0ff365b28974792e7acd5624e1ddd0d66731f346f0e7")
+	require.NoError(t, err)
+	assert.Equal(t, expHash, hasher.Sum(nil))
 }
 
 func TestAllZeroBytes(t *testing.T) {
