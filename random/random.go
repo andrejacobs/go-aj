@@ -79,3 +79,19 @@ func SecureUint32() (uint32, error) {
 	}
 	return result, nil
 }
+
+// Read 8 bytes from the secure random number generator and convert it to an uint64.
+func SecureUint64() (uint64, error) {
+	var result uint64
+	err := binary.Read(crand.Reader, binary.LittleEndian, &result)
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
+}
+
+// Read len(b) bytes into b from the secure random number generator.
+func SecureBytes(b []byte) error {
+	_, err := crand.Read(b)
+	return err
+}

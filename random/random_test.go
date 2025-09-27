@@ -54,5 +54,28 @@ func TestSecureUint32(t *testing.T) {
 		assert.False(t, exists)
 		seen[r] = struct{}{}
 	}
+}
 
+func TestSecureUint64(t *testing.T) {
+
+	seen := make(map[uint64]struct{})
+
+	for i := 0; i < 100; i++ {
+		r, err := random.SecureUint64()
+		require.NoError(t, err)
+
+		_, exists := seen[r]
+		assert.False(t, exists)
+		seen[r] = struct{}{}
+	}
+}
+
+func TestSecureBytes(t *testing.T) {
+	buffer1 := make([]byte, 42)
+	assert.NoError(t, random.SecureBytes(buffer1))
+
+	buffer2 := make([]byte, 42)
+	assert.NoError(t, random.SecureBytes(buffer2))
+
+	assert.NotEqual(t, buffer1, buffer2)
 }
