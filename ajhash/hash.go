@@ -1,9 +1,29 @@
+// Copyright (c) 2025 Andre Jacobs
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 // Package ajhash provides helpers for working with the stdlib hashing algorithms.
 package ajhash
 
 import (
 	"crypto"
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505 -- SHA1 is not used for cryptography
 	"crypto/sha256"
 	"crypto/sha512"
 	"hash"
@@ -58,7 +78,7 @@ func (h Algo) String() string {
 func (h Algo) Hasher() hash.Hash {
 	switch h {
 	case AlgoSHA1:
-		return sha1.New()
+		return sha1.New() // #nosec G401 -- SHA1 is not used for cryptography
 	case AlgoSHA256:
 		return sha256.New()
 	case AlgoSHA512:
@@ -110,8 +130,8 @@ func AllZeroBytes(buf []byte) bool {
 }
 
 var (
-	// Used to write out zeroes for an uncalculated hash wihtout doing an alloc
-	// NOTE: Don't create duplicate buffers, e.g. next 64 byte algo can just point to the same SHA512 one
+	// Used to write out zeroes for an uncalculated hash wihtout doing an alloc.
+	// NOTE: Don't create duplicate buffers, e.g. next 64 byte algo can just point to the same SHA512 one.
 	algoSHA1Zero   = make([]byte, sha1.Size)   // 20 bytes
 	algoSHA256Zero = make([]byte, sha256.Size) // 32 bytes
 	algoSHA512Zero = make([]byte, sha512.Size) // 64 bytes
