@@ -44,7 +44,6 @@ func TestInit(t *testing.T) {
 
 	u32 := ajio.NewVariableDataUint32()
 	assert.Equal(t, 4, u32.PrefixSize())
-	assert.Equal(t, math.MaxUint32, int(u32.MaxSize()))
 	assert.Equal(t, binary.LittleEndian, u32.ByteOrder())
 
 	u64 := ajio.NewVariableDataUint64()

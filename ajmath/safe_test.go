@@ -323,14 +323,6 @@ func TestIntToInt32(t *testing.T) {
 	v, err = ajmath.IntToInt32(math.MaxInt32)
 	assert.NoError(t, err)
 	assert.Equal(t, int32(math.MaxInt32), v)
-
-	v, err = ajmath.IntToInt32(math.MinInt32 - 1)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerUnderflow)
-	assert.Equal(t, int32(0), v)
-
-	v, err = ajmath.IntToInt32(math.MaxInt32 + 1)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
-	assert.Equal(t, int32(0), v)
 }
 
 func TestUintToUint8(t *testing.T) {
@@ -381,10 +373,6 @@ func TestUintToUint32(t *testing.T) {
 	v, err = ajmath.UintToUint32(math.MaxUint32)
 	assert.NoError(t, err)
 	assert.Equal(t, uint32(math.MaxUint32), v)
-
-	v, err = ajmath.UintToUint32(math.MaxUint32 + 1)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
-	assert.Equal(t, uint32(0), v)
 }
 
 //-----------------------------------------------------------------------------
@@ -395,15 +383,11 @@ func TestIntSize(t *testing.T) {
 }
 
 func TestUint32ToInt(t *testing.T) {
-	v, err := ajmath.Uint32ToInt(math.MaxUint32)
+	// 32 bit machine
 	if ajmath.IntSize == 32 {
-		// 32 bit machine
+		v, err := ajmath.Uint32ToInt(math.MaxUint32)
 		assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
 		assert.Equal(t, 0, v)
-	} else {
-		// 64 bit machine
-		assert.NoError(t, err)
-		assert.Equal(t, math.MaxUint32, v)
 	}
 }
 

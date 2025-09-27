@@ -61,6 +61,29 @@ endif
 check: check-formatting check-lint
 
 #------------------------------------------------------------------------------
+# Cross compilation testing
+#------------------------------------------------------------------------------
+
+# NOTE: I am using an Apple M2 at the moment and the following has not been tested on other systems
+
+# Check the unit-tests (and thus the packages) compile on a 32bit x86 Linux machine
+.PHONY: build-tests-32bit
+build-tests-32bit:
+	@echo "Building unit-tests to be run on 32 bit architecture"
+	@mkdir -p ${BUILD_OUTPUT_DIR}/bin/tests
+	@for pkg in $$(go list ./...); do \
+    	GOOS=linux GOARCH=386 CGO_ENABLED=0 go test -c "$$pkg" -o "${BUILD_OUTPUT_DIR}/bin/tests/$$(basename $$pkg).test"; \
+	done
+
+# Run the unit-tests on a 32bit x86 Linux emulated machine using Docker
+.PHONY: test-32bit
+test-32bit:
+	@command -v docker >/dev/null 2>&1 || { echo "docker not found. Please install docker first."; exit 1; }
+
+	docker run --rm -v $$(pwd):/app -w /app --platform linux/386 golang:1.25.1 \
+    	go test -v ./...
+
+#------------------------------------------------------------------------------
 # Miscellaneous
 #------------------------------------------------------------------------------
 
