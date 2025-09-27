@@ -17,7 +17,7 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package ajio_test
+package vardata_test
 
 import (
 	"bytes"
@@ -26,41 +26,41 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/andrejacobs/go-aj/ajio"
+	"github.com/andrejacobs/go-aj/ajio/vardata"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestInit(t *testing.T) {
-	u8 := ajio.NewVariableDataUint8()
+	u8 := vardata.NewVariableDataUint8()
 	assert.Equal(t, 1, u8.PrefixSize())
 	assert.Equal(t, math.MaxUint8, int(u8.MaxSize()))
 	assert.Equal(t, binary.LittleEndian, u8.ByteOrder())
 
-	u16 := ajio.NewVariableDataUint16()
+	u16 := vardata.NewVariableDataUint16()
 	assert.Equal(t, 2, u16.PrefixSize())
 	assert.Equal(t, math.MaxUint16, int(u16.MaxSize()))
 	assert.Equal(t, binary.LittleEndian, u16.ByteOrder())
 
-	u32 := ajio.NewVariableDataUint32()
+	u32 := vardata.NewVariableDataUint32()
 	assert.Equal(t, 4, u32.PrefixSize())
 	assert.Equal(t, binary.LittleEndian, u32.ByteOrder())
 
-	u64 := ajio.NewVariableDataUint64()
+	u64 := vardata.NewVariableDataUint64()
 	assert.Equal(t, 8, u64.PrefixSize())
 	assert.Equal(t, uint64(math.MaxUint64), u64.MaxSize())
 	assert.Equal(t, binary.LittleEndian, u64.ByteOrder())
 
-	u16BigEndian := ajio.NewVariableDataUint16().BigEndian()
+	u16BigEndian := vardata.NewVariableDataUint16().BigEndian()
 	assert.Equal(t, 2, u16BigEndian.PrefixSize())
 	assert.Equal(t, math.MaxUint16, int(u16BigEndian.MaxSize()))
 	assert.Equal(t, binary.BigEndian, u16BigEndian.ByteOrder())
 
-	assert.Equal(t, binary.LittleEndian, ajio.NewVariableDataUint8().LittleEndian().ByteOrder())
-	assert.Equal(t, binary.BigEndian, ajio.NewVariableDataUint8().BigEndian().ByteOrder())
-	assert.Equal(t, binary.NativeEndian, ajio.NewVariableDataUint8().NativeEndian().ByteOrder())
+	assert.Equal(t, binary.LittleEndian, vardata.NewVariableDataUint8().LittleEndian().ByteOrder())
+	assert.Equal(t, binary.BigEndian, vardata.NewVariableDataUint8().BigEndian().ByteOrder())
+	assert.Equal(t, binary.NativeEndian, vardata.NewVariableDataUint8().NativeEndian().ByteOrder())
 
-	vd := ajio.NewVariableData()
+	vd := vardata.NewVariableData()
 	assert.Equal(t, binary.LittleEndian, vd.ByteOrder())
 }
 
@@ -68,7 +68,7 @@ func TestWriteAndReadUint8(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableDataUint8()
+	v := vardata.NewVariableDataUint8()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+v.PrefixSize(), wcount)
@@ -83,7 +83,7 @@ func TestWriteAndReadUint16(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableDataUint16()
+	v := vardata.NewVariableDataUint16()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+v.PrefixSize(), wcount)
@@ -98,7 +98,7 @@ func TestWriteAndReadUint32(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableDataUint32()
+	v := vardata.NewVariableDataUint32()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+v.PrefixSize(), wcount)
@@ -113,7 +113,7 @@ func TestWriteAndReadUint64(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableDataUint64()
+	v := vardata.NewVariableDataUint64()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+v.PrefixSize(), wcount)
@@ -128,7 +128,7 @@ func TestReadUsingExistingBuffer(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableDataUint8()
+	v := vardata.NewVariableDataUint8()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+v.PrefixSize(), wcount)
@@ -159,7 +159,7 @@ func TestWriteTooBig(t *testing.T) {
 	tooBig := make([]byte, math.MaxUint8+1)
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableDataUint8()
+	v := vardata.NewVariableDataUint8()
 	wcount, err := v.Write(&buffer, tooBig)
 	require.Error(t, err)
 	assert.Equal(t, 0, wcount)
@@ -169,7 +169,7 @@ func TestWriteAndReadString(t *testing.T) {
 	expected := "The quick brown fox jumped over the lazy dog!"
 	buffer := bytes.Buffer{}
 
-	v8 := ajio.NewVariableDataUint8()
+	v8 := vardata.NewVariableDataUint8()
 	wcount, err := v8.WriteString(&buffer, expected)
 	require.NoError(t, err)
 	assert.Equal(t, len(expected)+v8.PrefixSize(), wcount)
@@ -179,7 +179,7 @@ func TestWriteAndReadString(t *testing.T) {
 	assert.Equal(t, expected, s)
 	assert.Equal(t, len(expected)+v8.PrefixSize(), rcount)
 
-	v16 := ajio.NewVariableDataUint16()
+	v16 := vardata.NewVariableDataUint16()
 	wcount, err = v16.WriteString(&buffer, expected)
 	require.NoError(t, err)
 	assert.Equal(t, len(expected)+v16.PrefixSize(), wcount)
@@ -189,7 +189,7 @@ func TestWriteAndReadString(t *testing.T) {
 	assert.Equal(t, expected, s)
 	assert.Equal(t, len(expected)+v16.PrefixSize(), rcount)
 
-	v32 := ajio.NewVariableDataUint32()
+	v32 := vardata.NewVariableDataUint32()
 	wcount, err = v32.WriteString(&buffer, expected)
 	require.NoError(t, err)
 	assert.Equal(t, len(expected)+v32.PrefixSize(), wcount)
@@ -199,7 +199,7 @@ func TestWriteAndReadString(t *testing.T) {
 	assert.Equal(t, expected, s)
 	assert.Equal(t, len(expected)+v32.PrefixSize(), rcount)
 
-	v64 := ajio.NewVariableDataUint64()
+	v64 := vardata.NewVariableDataUint64()
 	wcount, err = v64.WriteString(&buffer, expected)
 	require.NoError(t, err)
 	assert.Equal(t, len(expected)+v64.PrefixSize(), wcount)
@@ -217,7 +217,7 @@ func TestWriteAndReadVarInt(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableData()
+	v := vardata.NewVariableData()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+1, wcount)
@@ -244,7 +244,7 @@ func TestReadVarIntUsingExistingBuffer(t *testing.T) {
 	expectedData := []byte("The quick brown fox")
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableData()
+	v := vardata.NewVariableData()
 	wcount, err := v.Write(&buffer, expectedData)
 	require.NoError(t, err)
 	assert.Equal(t, len(expectedData)+1, wcount)
@@ -274,7 +274,7 @@ func TestWriteAndReadStringVarInt(t *testing.T) {
 	expected := "The quick brown fox jumped over the lazy dog!"
 	buffer := bytes.Buffer{}
 
-	v := ajio.NewVariableData()
+	v := vardata.NewVariableData()
 	wcount, err := v.WriteString(&buffer, expected)
 	require.NoError(t, err)
 	assert.Equal(t, len(expected)+1, wcount)

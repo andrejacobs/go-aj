@@ -17,32 +17,34 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package ajio_test
+package random_test
 
 import (
-	"crypto/rand"
-	"io"
 	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/andrejacobs/go-aj/random"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestMain(m *testing.M) {
-	os.Exit(m.Run())
+func TestCreateFile(t *testing.T) {
+	path := filepath.Join(os.TempDir(), "unit-testing")
+	require.NoError(t, random.CreateFile(path, 100))
+	defer os.Remove(path)
+
+	info, err := os.Stat(path)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(100), info.Size())
 }
 
-//-----------------------------------------------------------------------------
+func TestCreateTempFile(t *testing.T) {
+	path, err := random.CreateTempFile("", "unit-testing", 100)
+	require.NoError(t, err)
+	defer os.Remove(path)
 
-func createTempFile(size int64) (string, error) {
-	f, err := os.CreateTemp("", "unit-testing")
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	_, err = io.CopyN(f, rand.Reader, size)
-	if err != nil {
-		return "", err
-	}
-
-	return f.Name(), nil
+	info, err := os.Stat(path)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(100), info.Size())
 }

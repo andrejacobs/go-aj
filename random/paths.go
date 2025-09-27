@@ -22,9 +22,7 @@ package random
 // Provide utility functions for creating random file paths. Mainly used in unit-testing.
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"strings"
@@ -77,11 +75,11 @@ func CreateFiles(dir string,
 		path := path.Join(dir, fmt.Sprintf("%s-%d", String(Int(1, 16)), i))
 		if currentTotalSize < maxTotalSize {
 			amount := min(int64(Int(0, int(maxSize))), int64(maxTotalSize-currentTotalSize))
-			wc, err := CreateFileWithSize(path, uint64(amount))
+			err := CreateFile(path, amount)
 			if err != nil {
 				return currentTotalSize, err
 			}
-			currentTotalSize += uint64(wc)
+			currentTotalSize += uint64(amount)
 			if currentTotalSize >= maxTotalSize {
 				break
 			}
@@ -89,16 +87,4 @@ func CreateFiles(dir string,
 	}
 
 	return currentTotalSize, nil
-}
-
-// Create a file with the exact size in bytes, by copying bytes from the cryptographically secure random number generator.
-func CreateFileWithSize(path string, size uint64) (uint64, error) {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0644)
-	if err != nil {
-		return 0, err
-	}
-	defer f.Close()
-
-	wc, err := io.CopyN(f, rand.Reader, int64(size))
-	return uint64(wc), err
 }

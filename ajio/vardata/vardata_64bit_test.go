@@ -20,17 +20,17 @@
 //go:build amd64 || arm64
 // +build amd64 arm64
 
-package ajio_test
+package vardata_test
 
 import (
 	"math"
 	"testing"
 
-	"github.com/andrejacobs/go-aj/ajio"
+	"github.com/andrejacobs/go-aj/ajio/vardata"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInit_on_64bit(t *testing.T) {
-	u32 := ajio.NewVariableDataUint32()
+	u32 := vardata.NewVariableDataUint32()
 	assert.Equal(t, math.MaxUint32, int(u32.MaxSize()))
 }

@@ -17,7 +17,8 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package ajio
+// Package vardata is used to read or write variable length data.
+package vardata
 
 import (
 	"encoding/binary"
@@ -28,6 +29,13 @@ import (
 
 	"golang.org/x/exp/constraints"
 )
+
+// Need to be able to do io.Reader.Read as well as io.ByteReader.ReadByte
+// bufio.NewReader implements this interface.
+type Reader interface {
+	io.Reader
+	io.ByteReader
+}
 
 // VariableDataFixedLen is used to read and write variable sized data from an io.Reader or io.Writer.
 // Data written to an io.Writer is first prefixed with the size of the data to be written.
@@ -194,7 +202,7 @@ func (v VariableData) Write(w io.Writer, data []byte) (int, error) {
 // Read the size of the data followed by that amount of bytes into the provided buffer.
 // A new buffer will be allocated if the provided one is not large enough to hold the data.
 // Returns the buffer and the number of bytes read including the size of the prefix.
-func (v VariableData) Read(r MultiByteReader, buffer []byte) ([]byte, int, error) {
+func (v VariableData) Read(r Reader, buffer []byte) ([]byte, int, error) {
 	dataLen, varintSize, err := v.readUvarint(r)
 	if err != nil {
 		return nil, varintSize, err
@@ -233,7 +241,7 @@ func (v VariableData) WriteString(w io.Writer, data string) (int, error) {
 // Read a string.
 // NOTE: If you are going to be reading a lot of strings then it is better to use the generic Read method
 // and passing in a pre-allocated []byte.
-func (v VariableData) ReadString(r MultiByteReader) (string, int, error) {
+func (v VariableData) ReadString(r Reader) (string, int, error) {
 	data, rcount, err := v.Read(r, nil)
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to read a string. %w", err)
