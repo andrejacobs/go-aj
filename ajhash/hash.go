@@ -92,11 +92,11 @@ func (h Algo) Hasher() hash.Hash {
 func (h Algo) ZeroValue() []byte {
 	switch h {
 	case AlgoSHA1:
-		return algoSHA1Zero
+		return make([]byte, sha1.Size) // 20 bytes
 	case AlgoSHA256:
-		return algoSHA256Zero
+		return make([]byte, sha256.Size) // 32 bytes
 	case AlgoSHA512:
-		return algoSHA512Zero
+		return make([]byte, sha512.Size) // 64 bytes
 	default:
 		panic("unknown hashing algorithm")
 	}
@@ -128,11 +128,3 @@ func AllZeroBytes(buf []byte) bool {
 	}
 	return true
 }
-
-var (
-	// Used to write out zeroes for an uncalculated hash wihtout doing an alloc.
-	// NOTE: Don't create duplicate buffers, e.g. next 64 byte algo can just point to the same SHA512 one.
-	algoSHA1Zero   = make([]byte, sha1.Size)   // 20 bytes
-	algoSHA256Zero = make([]byte, sha256.Size) // 32 bytes
-	algoSHA512Zero = make([]byte, sha512.Size) // 64 bytes
-)

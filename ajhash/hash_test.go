@@ -46,11 +46,17 @@ func TestHashAssumptions(t *testing.T) {
 
 	assert.Equal(t, ajhash.AlgoSHA1.Size(), len(ajhash.AlgoSHA1.ZeroValue()))
 	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA1.ZeroValue()))
+	ajhash.AlgoSHA1.ZeroValue()[2] = 0xCC
+	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA1.ZeroValue()))
 
 	assert.Equal(t, ajhash.AlgoSHA256.Size(), len(ajhash.AlgoSHA256.ZeroValue()))
 	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA256.ZeroValue()))
+	ajhash.AlgoSHA256.ZeroValue()[2] = 0xCC
+	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA256.ZeroValue()))
 
 	assert.Equal(t, ajhash.AlgoSHA512.Size(), len(ajhash.AlgoSHA512.ZeroValue()))
+	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA512.ZeroValue()))
+	ajhash.AlgoSHA512.ZeroValue()[2] = 0xCC
 	assert.True(t, ajhash.AllZeroBytes(ajhash.AlgoSHA512.ZeroValue()))
 
 	// shasum -a 1 /dev/null
