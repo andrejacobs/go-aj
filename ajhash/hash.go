@@ -102,6 +102,11 @@ func (h Algo) ZeroValue() []byte {
 	}
 }
 
+// Return a slice of bytes that is of the correct digest size that can be used for reading or writing.
+func (h Algo) Buffer() []byte {
+	return h.ZeroValue()
+}
+
 // Return the hash (as a string) for when zero bytes are hashed.
 func (h Algo) HashedStringForZeroBytes() string {
 	switch h {
