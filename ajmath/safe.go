@@ -34,6 +34,9 @@ var (
 	ErrIntegerUnderflow = errors.New("integer underflow occurred")
 )
 
+// IntSize is the size in bits of an int or uint value on the running platform. Either 32 or 64.
+const IntSize = 32 << (^uint(0) >> 63) // taken from strconv.IntSize and math.intSize
+
 // Add two unsigned 32bit integers.
 // Returns [ErrIntegerOverflow] if an overflow occurred.
 func Add32(x, y uint32) (uint32, error) {
@@ -252,4 +255,26 @@ func UintToUint32(x uint) (uint32, error) {
 		return 0, ErrIntegerOverflow
 	}
 	return uint32(x), nil
+}
+
+// Cast from unsigned 32bit integer to platform dependant signed integer.
+// Return [ErrIntegerOverflow] if x is too big.
+func Uint32ToInt(x uint32) (int, error) {
+	if (IntSize == 32) && (x > math.MaxInt32) {
+		return 0, ErrIntegerOverflow
+	}
+
+	return int(x), nil
+}
+
+// Cast from unsigned 64bit integer to platform dependant signed integer.
+// Return [ErrIntegerOverflow] if x is too big.
+func Uint64ToInt(x uint64) (int, error) {
+	if (IntSize == 32) && (x > math.MaxInt32) {
+		return 0, ErrIntegerOverflow
+	} else if x > math.MaxInt64 {
+		return 0, ErrIntegerOverflow
+	}
+
+	return int(x), nil
 }

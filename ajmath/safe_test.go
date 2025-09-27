@@ -22,6 +22,7 @@ package ajmath_test
 
 import (
 	"math"
+	"strconv"
 	"testing"
 
 	"github.com/andrejacobs/go-aj/ajmath"
@@ -384,4 +385,42 @@ func TestUintToUint32(t *testing.T) {
 	v, err = ajmath.UintToUint32(math.MaxUint32 + 1)
 	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
 	assert.Equal(t, uint32(0), v)
+}
+
+//-----------------------------------------------------------------------------
+// Platform safety
+
+func TestIntSize(t *testing.T) {
+	assert.Equal(t, strconv.IntSize, ajmath.IntSize)
+}
+
+func TestUint32ToInt(t *testing.T) {
+	v, err := ajmath.Uint32ToInt(math.MaxUint32)
+	if ajmath.IntSize == 32 {
+		// 32 bit machine
+		assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+		assert.Equal(t, 0, v)
+	} else {
+		// 64 bit machine
+		assert.NoError(t, err)
+		assert.Equal(t, math.MaxUint32, v)
+	}
+}
+
+func TestUint64ToInt(t *testing.T) {
+	if ajmath.IntSize == 32 {
+		// 32 bit machine
+		v, err := ajmath.Uint64ToInt(math.MaxUint32)
+		assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+		assert.Equal(t, 0, v)
+
+		v, err = ajmath.Uint64ToInt(math.MaxUint64)
+		assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+		assert.Equal(t, 0, v)
+	} else {
+		// 64 bit machine
+		v, err := ajmath.Uint64ToInt(math.MaxUint64)
+		assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+		assert.Equal(t, 0, v)
+	}
 }
