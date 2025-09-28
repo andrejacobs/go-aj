@@ -231,6 +231,41 @@ func IntToInt32(x int) (int32, error) {
 	return int32(x), nil
 }
 
+// Cast from platform dependant signed integer to an unsigned 8bit integer.
+// Return [ErrIntegerUnderflow] if x is too small.
+// Return [ErrIntegerOverflow] if x is too big.
+func IntToUint8(x int) (uint8, error) {
+	if x < 0 {
+		return 0, ErrIntegerUnderflow
+	} else if x > math.MaxUint8 {
+		return 0, ErrIntegerOverflow
+	}
+	return uint8(x), nil
+}
+
+// Cast from platform dependant signed integer to an unsigned 16bit integer.
+// Return [ErrIntegerUnderflow] if x is too small.
+// Return [ErrIntegerOverflow] if x is too big.
+func IntToUint16(x int) (uint16, error) {
+	if x < 0 {
+		return 0, ErrIntegerUnderflow
+	} else if x > math.MaxUint16 {
+		return 0, ErrIntegerOverflow
+	}
+	return uint16(x), nil
+}
+
+//func IntToUint32(x int) (uint32, error) [see safe_32bit.go & safe_64bit.go]
+
+// Cast from platform dependant signed integer to an unsigned 64bit integer.
+// Return [ErrIntegerUnderflow] if x is too small.
+func IntToUint64(x int) (uint64, error) {
+	if x < 0 {
+		return 0, ErrIntegerUnderflow
+	}
+	return uint64(x), nil
+}
+
 // Cast from platform dependant unsigned integer to an unsigned 8bit integer.
 // Return [ErrIntegerOverflow] if x is too big.
 func UintToUint8(x uint) (uint8, error) {

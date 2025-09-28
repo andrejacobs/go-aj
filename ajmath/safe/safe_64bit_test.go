@@ -52,3 +52,19 @@ func TestUint32ToInt_on_64bit(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, math.MaxUint32, v)
 }
+
+func TestIntToUint32_on_64bit(t *testing.T) {
+	v, err := safe.IntToUint32(math.MaxUint32)
+	assert.NoError(t, err)
+	assert.Equal(t, uint32(math.MaxUint32), v)
+
+	v, err = safe.IntToUint32(math.MaxUint32 + 1)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
+	assert.Equal(t, uint32(0), v)
+}
+
+func TestIntToUint64_on_64bit(t *testing.T) {
+	v, err := safe.IntToUint64(math.MaxInt64)
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(math.MaxInt64), v)
+}

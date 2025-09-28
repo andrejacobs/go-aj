@@ -325,6 +325,78 @@ func TestIntToInt32(t *testing.T) {
 	assert.Equal(t, int32(math.MaxInt32), v)
 }
 
+func TestIntToUint8(t *testing.T) {
+	v, err := safe.IntToUint8(0)
+	assert.NoError(t, err)
+	assert.Equal(t, uint8(0), v)
+
+	v, err = safe.IntToUint8(42)
+	assert.NoError(t, err)
+	assert.Equal(t, uint8(42), v)
+
+	v, err = safe.IntToUint8(math.MaxUint8)
+	assert.NoError(t, err)
+	assert.Equal(t, uint8(math.MaxUint8), v)
+
+	v, err = safe.IntToUint8(-42)
+	assert.ErrorIs(t, err, safe.ErrIntegerUnderflow)
+	assert.Equal(t, uint8(0), v)
+
+	v, err = safe.IntToUint8(math.MaxUint8 + 1)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
+	assert.Equal(t, uint8(0), v)
+}
+
+func TestIntToUint16(t *testing.T) {
+	v, err := safe.IntToUint16(0)
+	assert.NoError(t, err)
+	assert.Equal(t, uint16(0), v)
+
+	v, err = safe.IntToUint16(42)
+	assert.NoError(t, err)
+	assert.Equal(t, uint16(42), v)
+
+	v, err = safe.IntToUint16(math.MaxUint16)
+	assert.NoError(t, err)
+	assert.Equal(t, uint16(math.MaxUint16), v)
+
+	v, err = safe.IntToUint16(-42)
+	assert.ErrorIs(t, err, safe.ErrIntegerUnderflow)
+	assert.Equal(t, uint16(0), v)
+
+	v, err = safe.IntToUint16(math.MaxUint16 + 1)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
+	assert.Equal(t, uint16(0), v)
+}
+
+func TestIntToUint32(t *testing.T) {
+	v, err := safe.IntToUint32(0)
+	assert.NoError(t, err)
+	assert.Equal(t, uint32(0), v)
+
+	v, err = safe.IntToUint32(42)
+	assert.NoError(t, err)
+	assert.Equal(t, uint32(42), v)
+
+	v, err = safe.IntToUint32(-42)
+	assert.ErrorIs(t, err, safe.ErrIntegerUnderflow)
+	assert.Equal(t, uint32(0), v)
+}
+
+func TestIntToUint64(t *testing.T) {
+	v, err := safe.IntToUint64(0)
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(0), v)
+
+	v, err = safe.IntToUint64(42)
+	assert.NoError(t, err)
+	assert.Equal(t, uint64(42), v)
+
+	v, err = safe.IntToUint64(-42)
+	assert.ErrorIs(t, err, safe.ErrIntegerUnderflow)
+	assert.Equal(t, uint64(0), v)
+}
+
 func TestUintToUint8(t *testing.T) {
 	v, err := safe.UintToUint8(0)
 	assert.NoError(t, err)
