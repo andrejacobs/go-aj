@@ -27,7 +27,7 @@ import (
 	"testing"
 
 	"github.com/andrejacobs/go-aj/ajio/trackedoffset"
-	"github.com/andrejacobs/go-aj/ajmath"
+	"github.com/andrejacobs/go-aj/ajmath/safe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,5 +80,5 @@ func TestReaderOverflow(t *testing.T) {
 
 	buffer := make([]byte, 4)
 	_, err := tr.Read(buffer)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
 }

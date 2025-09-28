@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package ajmath
+// Package safe provides safe casting operations for different data types.
+package safe
 
 import (
 	"errors"

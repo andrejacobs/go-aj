@@ -26,7 +26,7 @@ import (
 	"testing"
 
 	"github.com/andrejacobs/go-aj/ajio/trackedoffset"
-	"github.com/andrejacobs/go-aj/ajmath"
+	"github.com/andrejacobs/go-aj/ajmath/safe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -70,5 +70,5 @@ func TestWriterOverflow(t *testing.T) {
 
 	data := []byte("The quick brown fox jumped over the lazy dog!")
 	_, err := tw.Write(data)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
 }

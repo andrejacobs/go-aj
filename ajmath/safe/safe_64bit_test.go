@@ -21,34 +21,34 @@
 //go:build amd64 || arm64
 // +build amd64 arm64
 
-package ajmath_test
+package safe_test
 
 import (
 	"math"
 	"testing"
 
-	"github.com/andrejacobs/go-aj/ajmath"
+	"github.com/andrejacobs/go-aj/ajmath/safe"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestIntToInt32_on_64bit(t *testing.T) {
-	v, err := ajmath.IntToInt32(math.MinInt32 - 1)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerUnderflow)
+	v, err := safe.IntToInt32(math.MinInt32 - 1)
+	assert.ErrorIs(t, err, safe.ErrIntegerUnderflow)
 	assert.Equal(t, int32(0), v)
 
-	v, err = ajmath.IntToInt32(math.MaxInt32 + 1)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+	v, err = safe.IntToInt32(math.MaxInt32 + 1)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
 	assert.Equal(t, int32(0), v)
 }
 
 func TestUintToUint32_on_64bit(t *testing.T) {
-	v, err := ajmath.UintToUint32(math.MaxUint32 + 1)
-	assert.ErrorIs(t, err, ajmath.ErrIntegerOverflow)
+	v, err := safe.UintToUint32(math.MaxUint32 + 1)
+	assert.ErrorIs(t, err, safe.ErrIntegerOverflow)
 	assert.Equal(t, uint32(0), v)
 }
 
 func TestUint32ToInt_on_64bit(t *testing.T) {
-	v, err := ajmath.Uint32ToInt(math.MaxUint32)
+	v, err := safe.Uint32ToInt(math.MaxUint32)
 	assert.NoError(t, err)
 	assert.Equal(t, math.MaxUint32, v)
 }

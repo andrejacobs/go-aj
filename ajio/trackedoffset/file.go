@@ -26,7 +26,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/andrejacobs/go-aj/ajmath"
+	"github.com/andrejacobs/go-aj/ajmath/safe"
 )
 
 // File wraps an os.File and keeps track of the current offset without requiring constant calls to Seek which involves syscall Lseek to be made.
@@ -80,7 +80,7 @@ func (f *File) Read(p []byte) (int, error) {
 		return n, err
 	}
 
-	newOffset, err := ajmath.Add64(f.offset, uint64(n))
+	newOffset, err := safe.Add64(f.offset, uint64(n))
 	if err != nil {
 		return 0, err
 	}
@@ -96,7 +96,7 @@ func (f *File) ReadByte() (byte, error) {
 		return 0, err
 	}
 
-	newOffset, err := ajmath.Add64(f.offset, 1)
+	newOffset, err := safe.Add64(f.offset, 1)
 	if err != nil {
 		return 0, err
 	}
@@ -111,7 +111,7 @@ func (f *File) Write(p []byte) (int, error) {
 		return n, err
 	}
 
-	newOffset, err := ajmath.Add64(f.offset, uint64(n))
+	newOffset, err := safe.Add64(f.offset, uint64(n))
 	if err != nil {
 		return 0, err
 	}
@@ -126,7 +126,7 @@ func (f *File) WriteByte(c byte) error {
 		return err
 	}
 
-	newOffset, err := ajmath.Add64(f.offset, 1)
+	newOffset, err := safe.Add64(f.offset, 1)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (f *File) Seek(offset int64, whence int) (int64, error) {
 		return newOffset, err
 	}
 
-	f.offset, err = ajmath.Int64ToUint64(newOffset)
+	f.offset, err = safe.Int64ToUint64(newOffset)
 	if err != nil {
 		return newOffset, err
 	}
@@ -163,7 +163,7 @@ func (f *File) SyncOffset() error {
 		return err
 	}
 
-	f.offset, err = ajmath.Int64ToUint64(offset)
+	f.offset, err = safe.Int64ToUint64(offset)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ package trackedoffset
 import (
 	"io"
 
-	"github.com/andrejacobs/go-aj/ajmath"
+	"github.com/andrejacobs/go-aj/ajmath/safe"
 )
 
 // Writer keeps track of the offset within an io.Writer source.
@@ -48,7 +48,7 @@ func (w *Writer) Write(p []byte) (int, error) {
 		return n, err
 	}
 
-	newOffset, err := ajmath.Add64(w.offset, uint64(n))
+	newOffset, err := safe.Add64(w.offset, uint64(n))
 	if err != nil {
 		return 0, err
 	}
