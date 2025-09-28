@@ -22,6 +22,7 @@ package trackedoffset
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 
@@ -30,7 +31,7 @@ import (
 
 // File wraps an os.File and keeps track of the current offset without requiring constant calls to Seek which involves syscall Lseek to be made.
 // Reading and Writing is buffered by using the bufio package.
-// Implements the following interfaces: io.Reader, io.Writer, io.Seeker.
+// Implements the following interfaces: io.Reader, io.Writer, io.Seeker, io.ByteReader.
 type File struct {
 	of     *os.File
 	reader *bufio.Reader
@@ -72,7 +73,7 @@ func (f *File) Stat() (os.FileInfo, error) {
 	return f.of.Stat()
 }
 
-// Reader implementation.
+// io.Reader.
 func (f *File) Read(p []byte) (int, error) {
 	n, err := f.reader.Read(p)
 	if err != nil {
@@ -88,7 +89,22 @@ func (f *File) Read(p []byte) (int, error) {
 	return n, nil
 }
 
-// Writer implementation.
+// io.ByteReader.
+func (f *File) ReadByte() (byte, error) {
+	b, err := f.reader.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+
+	newOffset, err := ajmath.Add64(f.offset, 1)
+	if err != nil {
+		return 0, err
+	}
+	f.offset = newOffset
+	return b, nil
+}
+
+// io.Writer.
 func (f *File) Write(p []byte) (int, error) {
 	n, err := f.writer.Write(p)
 	if err != nil {
@@ -104,7 +120,21 @@ func (f *File) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-// Seeker implementation.
+// io.ByteWriter.
+func (f *File) WriteByte(c byte) error {
+	if err := f.writer.WriteByte(c); err != nil {
+		return err
+	}
+
+	newOffset, err := ajmath.Add64(f.offset, 1)
+	if err != nil {
+		return err
+	}
+	f.offset = newOffset
+	return nil
+}
+
+// io.Seeker.
 // It is recommended that you ResetReadBuffer or ResetWriteBuffer.
 func (f *File) Seek(offset int64, whence int) (int64, error) {
 	newOffset, err := f.of.Seek(offset, whence)
@@ -163,4 +193,52 @@ func (f *File) ResetWriteBuffer() {
 	f.writer.Reset(f.of)
 }
 
-//TODO: Flush writer buffer and maybe do a file sync
+//-----------------------------------------------------------------------------
+// Helpers
+
+// Wraps [os.OpenFile] to allow for more options.
+func OpenFile(path string, flag int, perm os.FileMode) (*File, error) {
+	f, err := os.OpenFile(path, flag, perm)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open the file %q. %w", path, err)
+	}
+
+	file, err := NewFile(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open the file %q. %w", path, err)
+	}
+
+	return file, nil
+}
+
+// Open a file for reading.
+// Wraps [os.Open].
+func Open(path string) (*File, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open the file %q. %w", path, err)
+	}
+
+	file, err := NewFile(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open the file %q. %w", path, err)
+	}
+
+	return file, nil
+}
+
+// Create a file for reading and writing.
+// Wraps [os.Create].
+func Create(path string) (*File, error) {
+	f, err := os.Create(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open the file %q. %w", path, err)
+	}
+
+	file, err := NewFile(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open the file %q. %w", path, err)
+	}
+
+	return file, nil
+}

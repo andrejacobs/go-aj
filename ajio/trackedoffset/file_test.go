@@ -23,6 +23,7 @@ package trackedoffset_test
 import (
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/andrejacobs/go-aj/ajio/trackedoffset"
@@ -114,10 +115,7 @@ func TestFileRead(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
 
-	f, err := os.Open(tempFile)
-	require.NoError(t, err)
-
-	tracker, err := trackedoffset.NewFile(f)
+	tracker, err := trackedoffset.Open(tempFile)
 	require.NoError(t, err)
 	defer tracker.Close()
 
@@ -137,6 +135,10 @@ func TestFileRead(t *testing.T) {
 	_, err = tracker.Read(buffer)
 	require.NoError(t, err)
 	assert.Equal(t, uint64(6), tracker.Offset())
+
+	_, err = tracker.ReadByte()
+	require.NoError(t, err)
+	assert.Equal(t, uint64(7), tracker.Offset())
 }
 
 func TestFileWrite(t *testing.T) {
@@ -145,10 +147,7 @@ func TestFileWrite(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Remove(tempFile)
 
-	f, err := os.OpenFile(tempFile, os.O_RDWR, 0)
-	require.NoError(t, err)
-
-	tracker, err := trackedoffset.NewFile(f)
+	tracker, err := trackedoffset.OpenFile(tempFile, os.O_RDWR, 0)
 	require.NoError(t, err)
 	defer tracker.Close()
 
@@ -168,6 +167,9 @@ func TestFileWrite(t *testing.T) {
 	_, err = tracker.Write(buffer)
 	require.NoError(t, err)
 	assert.Equal(t, uint64(6), tracker.Offset())
+
+	require.NoError(t, tracker.WriteByte(0x41))
+	assert.Equal(t, uint64(7), tracker.Offset())
 
 	err = tracker.Flush()
 	assert.NoError(t, err)
@@ -197,4 +199,47 @@ func TestFileSyncOffset(t *testing.T) {
 	actualOffset, err = f.Seek(0, io.SeekCurrent)
 	require.NoError(t, err)
 	assert.Equal(t, uint64(actualOffset), tracker.Offset())
+}
+
+func TestWriteRead(t *testing.T) {
+	tempFile := filepath.Join(os.TempDir(), "unit-testing")
+	_ = os.Remove(tempFile)
+	defer os.Remove(tempFile)
+
+	writer, err := trackedoffset.Create(tempFile)
+	require.NoError(t, err)
+	defer writer.Close()
+
+	expected := []byte("The quick brown fox jumped over the lazy dog!")
+	wc, err := writer.Write(expected)
+	require.NoError(t, err)
+	assert.Equal(t, len(expected), wc)
+
+	require.NoError(t, writer.WriteByte(0x41))
+	require.NoError(t, writer.WriteByte(0x4A))
+	assert.Equal(t, uint64(len(expected)+2), writer.Offset())
+
+	require.NoError(t, writer.Flush())
+
+	// Validate
+
+	reader, err := trackedoffset.Open(tempFile)
+	require.NoError(t, err)
+	defer writer.Close()
+
+	buffer := make([]byte, len(expected))
+	rc, err := reader.Read(buffer)
+	require.NoError(t, err)
+	assert.Equal(t, len(expected), rc)
+	assert.Equal(t, expected, buffer)
+
+	b, err := reader.ReadByte()
+	require.NoError(t, err)
+	assert.Equal(t, byte(0x41), b)
+
+	b, err = reader.ReadByte()
+	require.NoError(t, err)
+	assert.Equal(t, byte(0x4A), b)
+
+	assert.Equal(t, uint64(len(expected)+2), reader.Offset())
 }
