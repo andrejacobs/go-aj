@@ -27,6 +27,9 @@ import (
 
 // Walker is used to walk a file hierarchy.
 type Walker struct {
+	DirIncluder  MatchPathFn // Determine which directories should be walked
+	FileIncluder MatchPathFn // Determine which files should be walked
+
 	DirExcluder  MatchPathFn // Determine which directories should not be walked
 	FileExcluder MatchPathFn // Determine which files should not be walked
 }
@@ -36,25 +39,15 @@ type Walker struct {
 // By default all files and directories found will be walked and not be excluded.
 func NewWalker() *Walker {
 	return &Walker{
-		DirExcluder:  NeverMatch,
-		FileExcluder: NeverMatch,
+		DirIncluder:  MatchAlways,
+		FileIncluder: MatchAlways,
+		DirExcluder:  MatchNever,
+		FileExcluder: MatchNever,
 	}
 }
 
-// Set the excluder used to determine which directories should not be walked.
-func (w *Walker) SetDirExcluder(excluder MatchPathFn) *Walker {
-	w.DirExcluder = excluder
-	return w
-}
-
-// Set the excluder used to determine which files should not be walked.
-func (w *Walker) SetFileExcluder(excluder MatchPathFn) *Walker {
-	w.FileExcluder = excluder
-	return w
-}
-
 // Walk walks the file tree rooted at root, calling fn for each file or
-// directory in the tree, including root.
+// directory in the tree, including root that was not filtered.
 //
 // All errors that arise visiting files and directories are filtered by fn:
 // see the [fs.WalkDirFunc] documentation for details.
@@ -70,11 +63,14 @@ func (w *Walker) SetFileExcluder(excluder MatchPathFn) *Walker {
 //
 // Walk uses [fs.WalkDir] for implementation.
 //
-// For each directory that is found, the DirExcluder will be called to determine
-// if the path should not be walked.
+// For each directory that is found, the DirIncluder will be called to determine
+// if the path should be walked. If this filter returns false then the DirExcluder
+// will not be checked. The DirExcluder will be called to determine if the path should not be walked.
+// The root path will never be filtered.
 //
-// For each file that is found, the FileExcluder will be called to determine
-// if the path should not be walked.
+// For each file that is found, the FileIncluder will be called to determine
+// if the path should be walked. If this filter returns false then the FileExcluder
+// will not be checked. The FileExcluder will be called to determine if the path should not be walked.
 //
 // The root path will be expanded using [file.ExpandPath] if needed.
 func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
@@ -90,22 +86,48 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 			return fnErr
 		}
 
-		// Does the directory need to be excluded?
-		exclude, err := w.DirExcluder(path, d)
-		if err != nil {
-			return err
-		}
-		if exclude {
-			return fs.SkipDir
-		}
+		// Filter dir
+		if d.IsDir() {
+			// Only filter dir if it is not the root path
+			if path != expandedRoot {
+				// Does the directory need to be included?
+				include, err := w.DirIncluder(path, d)
+				if err != nil {
+					return err
+				}
+				if !include {
+					return fs.SkipDir
+				}
 
-		// Does the file need to be excluded?
-		exclude, err = w.FileExcluder(path, d)
-		if err != nil {
-			return err
-		}
-		if exclude {
-			return nil
+				// Does the directory need to be excluded?
+				exclude, err := w.DirExcluder(path, d)
+				if err != nil {
+					return err
+				}
+				if exclude {
+					return fs.SkipDir
+				}
+			}
+		} else {
+			// Filter file
+
+			// Does the file need to be included?
+			include, err := w.FileIncluder(path, d)
+			if err != nil {
+				return err
+			}
+			if !include {
+				return nil
+			}
+
+			// Does the file need to be excluded?
+			exclude, err := w.FileExcluder(path, d)
+			if err != nil {
+				return err
+			}
+			if exclude {
+				return nil
+			}
 		}
 
 		// fmt.Printf("walker>>> %q\n", path)
@@ -126,8 +148,13 @@ type MatchPathFn func(path string, d fs.DirEntry) (bool, error)
 // Similarly to how http middleware works in popular frameworks.
 type MatchPathMiddleware func(next MatchPathFn) MatchPathFn
 
-// NeverMatch is a MatchPathFn that will always return false.
-func NeverMatch(path string, d fs.DirEntry) (bool, error) {
+// MatchAlways is a MatchPathFn that will always return true.
+func MatchAlways(path string, d fs.DirEntry) (bool, error) {
+	return true, nil
+}
+
+// MatchNever is a MatchPathFn that will always return false.
+func MatchNever(path string, d fs.DirEntry) (bool, error) {
 	return false, nil
 }
 

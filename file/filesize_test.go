@@ -37,7 +37,7 @@ func TestCalculateSize(t *testing.T) {
 	result, err := file.CalculateSize(tempDir)
 	require.NoError(t, err)
 
-	assert.Equal(t, 2, result.Dirs)
-	assert.Equal(t, 7, result.Files)
-	assert.Equal(t, uint64(92), result.TotalSize)
+	assert.Equal(t, 3, result.Dirs)
+	assert.Equal(t, 9, result.Files)
+	assert.Equal(t, uint64(122), result.TotalSize)
 }

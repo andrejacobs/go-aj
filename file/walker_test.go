@@ -51,6 +51,41 @@ func TestWalkerDefaults(t *testing.T) {
 	assert.ElementsMatch(t, expected, result)
 }
 
+func TestWalkerIncludeDirs(t *testing.T) {
+	expected := make([]string, 0, 10)
+	err := filepath.WalkDir(tempDir, func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() && (path != tempDir) {
+			if d.Name() != "g" {
+				return fs.SkipDir
+			}
+		}
+		expected = append(expected, path)
+		return nil
+	})
+	require.NoError(t, err)
+	slices.Sort(expected)
+
+	result := make([]string, 0, 10)
+	var fn fs.WalkDirFunc = func(path string, d fs.DirEntry, err error) error {
+		// fmt.Printf("%q\n", path)
+		result = append(result, path)
+		return nil
+	}
+
+	w := file.NewWalker()
+	w.DirIncluder = (func(path string, d fs.DirEntry) (bool, error) {
+		if d.IsDir() && d.Name() == "g" {
+			return true, nil
+		}
+		return false, nil
+	})
+	err = w.Walk(tempDir, fn)
+	require.NoError(t, err)
+
+	slices.Sort(result)
+	assert.ElementsMatch(t, expected, result)
+}
+
 func TestWalkerExcludeDirs(t *testing.T) {
 	expected := make([]string, 0, 10)
 	err := filepath.WalkDir(tempDir, func(path string, d fs.DirEntry, err error) error {
@@ -71,12 +106,45 @@ func TestWalkerExcludeDirs(t *testing.T) {
 	}
 
 	w := file.NewWalker()
-	w.SetDirExcluder(func(path string, d fs.DirEntry) (bool, error) {
+	w.DirExcluder = (func(path string, d fs.DirEntry) (bool, error) {
 		if d.IsDir() && d.Name() == "d" {
 			return true, nil
 		}
 		return false, nil
 	})
+	err = w.Walk(tempDir, fn)
+	require.NoError(t, err)
+
+	slices.Sort(result)
+	assert.ElementsMatch(t, expected, result)
+}
+
+func TestWalkerIncludeFiles(t *testing.T) {
+	expected := make([]string, 0, 10)
+	err := filepath.WalkDir(tempDir, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() && (d.Name() != "a" && (d.Name() != "e")) {
+			return nil
+		}
+		expected = append(expected, path)
+		return nil
+	})
+	require.NoError(t, err)
+	slices.Sort(expected)
+
+	result := make([]string, 0, 10)
+	var fn fs.WalkDirFunc = func(path string, d fs.DirEntry, err error) error {
+		// fmt.Printf("%q\n", path)
+		result = append(result, path)
+		return nil
+	}
+
+	w := file.NewWalker()
+	w.FileIncluder = func(path string, d fs.DirEntry) (bool, error) {
+		if !d.IsDir() && (d.Name() == "a" || (d.Name() == "e")) {
+			return true, nil
+		}
+		return false, nil
+	}
 	err = w.Walk(tempDir, fn)
 	require.NoError(t, err)
 
@@ -104,12 +172,12 @@ func TestWalkerExcludeFiles(t *testing.T) {
 	}
 
 	w := file.NewWalker()
-	w.SetFileExcluder(func(path string, d fs.DirEntry) (bool, error) {
+	w.FileExcluder = func(path string, d fs.DirEntry) (bool, error) {
 		if !d.IsDir() && (d.Name() == "b" || (d.Name() == "e")) {
 			return true, nil
 		}
 		return false, nil
-	})
+	}
 	err = w.Walk(tempDir, fn)
 	require.NoError(t, err)
 
@@ -137,13 +205,13 @@ func TestWalkerExcludeFilesAndMiddleware(t *testing.T) {
 	}
 
 	w := file.NewWalker()
-	w.SetFileExcluder(file.MatchAppleDSStore(
+	w.FileExcluder = file.MatchAppleDSStore(
 		func(path string, d fs.DirEntry) (bool, error) {
 			if !d.IsDir() && (d.Name() == "b" || (d.Name() == "e")) {
 				return true, nil
 			}
 			return false, nil
-		}))
+		})
 
 	err = w.Walk(tempDir, fn)
 	require.NoError(t, err)

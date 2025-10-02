@@ -84,6 +84,19 @@ func makeFileTree() (string, error) {
 		return "", err
 	}
 
+	subDir = filepath.Join(tempDir, "g")
+	if err := os.Mkdir(subDir, 0744); err != nil {
+		return "", err
+	}
+
+	if err := makeFile(filepath.Join(subDir, "h"), 10); err != nil {
+		return "", err
+	}
+
+	if err := makeFile(filepath.Join(subDir, "i"), 20); err != nil {
+		return "", err
+	}
+
 	return tempDir, nil
 }
 
