@@ -220,20 +220,6 @@ func TestWalkerExcludeFilesAndMiddleware(t *testing.T) {
 	assert.ElementsMatch(t, expected, result)
 }
 
-func expectedFilepathWalk(path string) ([]string, error) {
-	expected := make([]string, 0, 10)
-	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
-		expected = append(expected, path)
-		return nil
-	})
-	if err != nil {
-		return expected, err
-	}
-
-	slices.Sort(expected)
-	return expected, nil
-}
-
 func TestWalkerPassesReceivedError(t *testing.T) {
 	var fn fs.WalkDirFunc = func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -266,4 +252,48 @@ func TestWalkerExpandsUsersHomeDir(t *testing.T) {
 	err := w.Walk("~/does-not-exist", fn)
 	var expErr *fs.PathError
 	require.ErrorAs(t, err, &expErr)
+}
+
+func TestWalkerExcludeFilesAndRegexMiddleware(t *testing.T) {
+	expected := make([]string, 0, 10)
+	err := filepath.WalkDir(tempDir, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() && (d.Name() == "a" || (d.Name() == "b") || (d.Name() == "c") || (d.Name() == ".DS_Store")) {
+			return nil
+		}
+		expected = append(expected, path)
+		return nil
+	})
+	require.NoError(t, err)
+	slices.Sort(expected)
+
+	result := make([]string, 0, 10)
+	var fn fs.WalkDirFunc = func(path string, d fs.DirEntry, err error) error {
+		// fmt.Printf("%q\n", path)
+		result = append(result, path)
+		return nil
+	}
+
+	w := file.NewWalker()
+	w.FileExcluder = file.MatchRegex([]string{"a$", "[bc]$"}, file.MatchAppleDSStore(file.MatchNever))
+	err = w.Walk(tempDir, fn)
+	require.NoError(t, err)
+
+	slices.Sort(result)
+	assert.ElementsMatch(t, expected, result)
+}
+
+//-----------------------------------------------------------------------------
+
+func expectedFilepathWalk(path string) ([]string, error) {
+	expected := make([]string, 0, 10)
+	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+		expected = append(expected, path)
+		return nil
+	})
+	if err != nil {
+		return expected, err
+	}
+
+	slices.Sort(expected)
+	return expected, nil
 }
