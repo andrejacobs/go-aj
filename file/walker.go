@@ -175,14 +175,13 @@ func MatchAppleDSStore(next MatchPathFn) MatchPathFn {
 
 // MatchRegex middleware takes a slice of regular expression patterns and will check
 // a path if any of the expressions matched.
-func MatchRegex(expressions []string, next MatchPathFn) MatchPathFn {
-	matcher, reErr := matches.NewRegexPathMatcher(expressions)
+func MatchRegex(expressions []string, next MatchPathFn) (MatchPathFn, error) {
+	matcher, err := matches.NewRegexPathMatcher(expressions)
+	if err != nil {
+		return nil, err
+	}
 
 	return func(path string, d fs.DirEntry) (bool, error) {
-		if reErr != nil {
-			return false, reErr
-		}
-
 		matched, err := matcher.Match(path)
 		if err != nil {
 			return false, err
@@ -191,5 +190,5 @@ func MatchRegex(expressions []string, next MatchPathFn) MatchPathFn {
 		}
 
 		return next(path, d)
-	}
+	}, nil
 }

@@ -274,7 +274,9 @@ func TestWalkerExcludeFilesAndRegexMiddleware(t *testing.T) {
 	}
 
 	w := file.NewWalker()
-	w.FileExcluder = file.MatchRegex([]string{"a$", "[bc]$"}, file.MatchAppleDSStore(file.MatchNever))
+	excluder, err := file.MatchRegex([]string{"a$", "[bc]$"}, file.MatchAppleDSStore(file.MatchNever))
+	require.NoError(t, err)
+	w.FileExcluder = excluder
 	err = w.Walk(tempDir, fn)
 	require.NoError(t, err)
 
