@@ -88,12 +88,17 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 			return fnErr
 		}
 
+		relPath, err := filepath.Rel(expandedRoot, path)
+		if err != nil {
+			return err
+		}
+
 		// Filter dir
 		if d.IsDir() {
 			// Only filter dir if it is not the root path
 			if path != expandedRoot {
 				// Does the directory need to be included?
-				include, err := w.DirIncluder(path, d)
+				include, err := w.DirIncluder(relPath, d)
 				if err != nil {
 					return err
 				}
@@ -102,7 +107,7 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 				}
 
 				// Does the directory need to be excluded?
-				exclude, err := w.DirExcluder(path, d)
+				exclude, err := w.DirExcluder(relPath, d)
 				if err != nil {
 					return err
 				}
@@ -114,7 +119,7 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 			// Filter file
 
 			// Does the file need to be included?
-			include, err := w.FileIncluder(path, d)
+			include, err := w.FileIncluder(relPath, d)
 			if err != nil {
 				return err
 			}
@@ -123,7 +128,7 @@ func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
 			}
 
 			// Does the file need to be excluded?
-			exclude, err := w.FileExcluder(path, d)
+			exclude, err := w.FileExcluder(relPath, d)
 			if err != nil {
 				return err
 			}
