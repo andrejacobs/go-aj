@@ -40,12 +40,7 @@ type Walker struct {
 //
 // By default all files and directories found will be walked and not be excluded.
 func NewWalker() *Walker {
-	return &Walker{
-		DirIncluder:  MatchAlways,
-		FileIncluder: MatchAlways,
-		DirExcluder:  MatchNever,
-		FileExcluder: MatchNever,
-	}
+	return &Walker{}
 }
 
 // Walk walks the file tree rooted at root, calling fn for each file or
@@ -76,6 +71,19 @@ func NewWalker() *Walker {
 //
 // The root path will be expanded using [file.ExpandPath] if needed.
 func (w *Walker) Walk(root string, fn fs.WalkDirFunc) error {
+	if w.DirIncluder == nil {
+		w.DirIncluder = MatchAlways
+	}
+	if w.FileIncluder == nil {
+		w.FileIncluder = MatchAlways
+	}
+	if w.DirExcluder == nil {
+		w.DirExcluder = MatchNever
+	}
+	if w.FileExcluder == nil {
+		w.FileExcluder = MatchNever
+	}
+
 	expandedRoot, err := ExpandPath(root)
 	if err != nil {
 		return fmt.Errorf("failed to expand the path %q. %w", root, err)
