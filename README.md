@@ -1,5 +1,9 @@
 # go-aj
 
+[![](https://github.com/andrejacobs/go-aj/actions/workflows/makefile.yml/badge.svg)](https://github.com/andrejacobs/go-aj/actions/workflows/makefile.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/andrejacobs/go-aj)](https://goreportcard.com/report/github.com/andrejacobs/go-aj)
+[![Go Reference](https://pkg.go.dev/badge/github.com/andrejacobs/go-aj.svg)](https://pkg.go.dev/github.com/andrejacobs/go-aj)
+
 My own go "micro" packages are small packages that are being incubated before potentially becoming full blown modules.
 
 Think of this as a repo for utility packages that are not big enough to warrant having a
