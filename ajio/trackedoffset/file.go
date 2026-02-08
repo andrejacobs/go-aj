@@ -155,6 +155,11 @@ func (f *File) Offset() uint64 {
 	return f.offset
 }
 
+// Set the current offset in bytes.
+func (f *File) SetOffset(newOffset uint64) {
+	f.offset = newOffset
+}
+
 // Ensure the File's offset and the underlying os.File's actual offsets are the same.
 // This will make a call to file.Seek.
 func (f *File) SyncOffset() error {
@@ -191,6 +196,23 @@ func (f *File) ResetReadBuffer() {
 // Ensure you call this if you have changed the current offset using Seek.
 func (f *File) ResetWriteBuffer() {
 	f.writer.Reset(f.of)
+}
+
+// Guard rails removed ------
+
+// Access the underlying os.File.
+func (f *File) File() *os.File {
+	return f.of
+}
+
+// Access the underlying bufio.Reader.
+func (f *File) Reader() *bufio.Reader {
+	return f.reader
+}
+
+// Access the underlying bufio.Writer.
+func (f *File) Writer() *bufio.Writer {
+	return f.writer
 }
 
 //-----------------------------------------------------------------------------

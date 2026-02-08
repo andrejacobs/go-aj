@@ -48,8 +48,15 @@ func TestNewFile(t *testing.T) {
 	_, err = tracker.Stat()
 	assert.NoError(t, err)
 
-	offset := tracker.Offset()
-	assert.Equal(t, uint64(0), offset)
+	assert.Equal(t, uint64(0), tracker.Offset())
+
+	tracker.SetOffset(0x414A)
+	assert.Equal(t, uint64(0x414A), tracker.Offset())
+
+	assert.NotNil(t, tracker.File())
+	assert.Equal(t, tempFile, tracker.File().Name())
+	assert.NotNil(t, tracker.Reader())
+	assert.NotNil(t, tracker.Writer())
 }
 
 func TestNewFileWithExistingOffset(t *testing.T) {
