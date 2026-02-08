@@ -21,10 +21,12 @@
 package trackedoffset_test
 
 import (
+	"bufio"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/andrejacobs/go-aj/ajio/trackedoffset"
 	"github.com/andrejacobs/go-aj/random"
@@ -249,4 +251,101 @@ func TestWriteRead(t *testing.T) {
 	assert.Equal(t, byte(0x4A), b)
 
 	assert.Equal(t, uint64(len(expected)+2), reader.Offset())
+}
+
+func TestPeekDiscardUnread(t *testing.T) {
+	tempFile := filepath.Join(t.TempDir(), "unit-testing")
+	defer os.Remove(tempFile)
+
+	f, err := os.Create(tempFile)
+	require.NoError(t, err)
+
+	_, err = f.WriteString("The quick brown fox jumped over the lazy dog!")
+	require.NoError(t, err)
+	require.NoError(t, f.Close())
+
+	// Peek
+
+	f, err = os.Open(tempFile)
+	require.NoError(t, err)
+
+	tracker, err := trackedoffset.NewFile(f)
+	require.NoError(t, err)
+	defer tracker.Close()
+
+	data, err := tracker.Peek(3)
+	require.NoError(t, err)
+	assert.Len(t, data, 3)
+	assert.Equal(t, "The", string(data))
+	assert.Equal(t, uint64(0), tracker.Offset())
+
+	var buffer [4]byte
+	count, err := tracker.Read(buffer[:])
+	require.NoError(t, err)
+	assert.Equal(t, 4, count)
+	assert.Equal(t, uint64(4), tracker.Offset())
+	assert.Equal(t, "The ", string(buffer[:]))
+
+	// Discard
+	count, err = tracker.Discard(6)
+	require.NoError(t, err)
+	assert.Equal(t, 6, count)
+	assert.Equal(t, uint64(10), tracker.Offset())
+
+	count, err = tracker.Read(buffer[:])
+	assert.Equal(t, "brow", string(buffer[:]))
+
+	// Unread
+	_, err = tracker.Discard(2)
+	require.NoError(t, err)
+
+	b, err := tracker.ReadByte()
+	require.NoError(t, err)
+	assert.Equal(t, byte('f'), b)
+
+	offset := tracker.Offset()
+	assert.Equal(t, uint64(17), offset)
+
+	require.NoError(t, tracker.UnreadByte())
+	assert.Equal(t, uint64(offset-1), tracker.Offset())
+
+	assert.ErrorIs(t, tracker.UnreadByte(), bufio.ErrInvalidUnreadByte)
+}
+
+func TestWriteReadRune(t *testing.T) {
+	tempFile := filepath.Join(t.TempDir(), "unit-testing")
+	_ = os.Remove(tempFile)
+	defer os.Remove(tempFile)
+
+	f, err := trackedoffset.Create(tempFile)
+	require.NoError(t, err)
+
+	count, err := f.WriteRune('ส')
+	require.NoError(t, err)
+	assert.Equal(t, utf8.RuneLen('ส'), count)
+	assert.Equal(t, uint64(3), f.Offset())
+
+	count, err = f.WriteRune('語')
+	require.NoError(t, err)
+	assert.Equal(t, utf8.RuneLen('語'), count)
+	assert.Equal(t, uint64(6), f.Offset())
+
+	require.NoError(t, f.Flush())
+	require.NoError(t, f.Close())
+
+	f, err = trackedoffset.Open(tempFile)
+	require.NoError(t, err)
+	defer f.Close()
+
+	r, s, err := f.ReadRune()
+	require.NoError(t, err)
+	assert.Equal(t, 3, s)
+	assert.Equal(t, 'ส', r)
+	assert.Equal(t, uint64(3), f.Offset())
+
+	r, s, err = f.ReadRune()
+	require.NoError(t, err)
+	assert.Equal(t, 3, s)
+	assert.Equal(t, '語', r)
+	assert.Equal(t, uint64(6), f.Offset())
 }
