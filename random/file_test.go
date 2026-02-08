@@ -30,7 +30,7 @@ import (
 )
 
 func TestCreateFile(t *testing.T) {
-	path := filepath.Join(os.TempDir(), "unit-testing")
+	path := filepath.Join(t.TempDir(), "unit-testing")
 	require.NoError(t, random.CreateFile(path, 100))
 	defer os.Remove(path)
 

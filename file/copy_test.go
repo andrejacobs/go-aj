@@ -40,7 +40,7 @@ func TestCopyFile(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, src.Close())
 
-	destPath := filepath.Join(os.TempDir(), "unit-test-dest")
+	destPath := filepath.Join(t.TempDir(), "unit-test-dest")
 	defer os.Remove(destPath)
 	wc, err := file.CopyFile(context.Background(), src.Name(), destPath)
 	require.NoError(t, err)
@@ -65,7 +65,7 @@ func TestCopyFileN(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, src.Close())
 
-	destPath := filepath.Join(os.TempDir(), "unit-test-dest")
+	destPath := filepath.Join(t.TempDir(), "unit-test-dest")
 	defer os.Remove(destPath)
 	wc, err := file.CopyFileN(context.Background(), src.Name(), destPath, 9)
 	require.NoError(t, err)
