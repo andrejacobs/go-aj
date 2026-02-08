@@ -31,7 +31,7 @@ import (
 )
 
 func TestAcquireLockfile(t *testing.T) {
-	lockPath := filepath.Join(os.TempDir(), "unit-test.lock")
+	lockPath := filepath.Join(t.TempDir(), "unit-test.lock")
 	os.Remove(lockPath)
 	defer os.Remove(lockPath)
 
@@ -65,7 +65,7 @@ func TestAcquireLockfile(t *testing.T) {
 }
 
 func TestAcquireLockfileReEntrant(t *testing.T) {
-	lockPath := filepath.Join(os.TempDir(), "unit-test.lock")
+	lockPath := filepath.Join(t.TempDir(), "unit-test.lock")
 	os.Remove(lockPath)
 	defer os.Remove(lockPath)
 
@@ -85,7 +85,7 @@ func TestAcquireLockfileReEntrant(t *testing.T) {
 }
 
 func TestReleaseNotOwnedLockfile(t *testing.T) {
-	lockPath := filepath.Join(os.TempDir(), "unit-test.lock")
+	lockPath := filepath.Join(t.TempDir(), "unit-test.lock")
 	os.Remove(lockPath)
 	defer os.Remove(lockPath)
 
@@ -106,7 +106,7 @@ func TestReleaseNotOwnedLockfile(t *testing.T) {
 }
 
 func TestInvalidLockfile(t *testing.T) {
-	lockPath := filepath.Join(os.TempDir(), "unit-test.lock")
+	lockPath := filepath.Join(t.TempDir(), "unit-test.lock")
 	os.Remove(lockPath)
 	defer os.Remove(lockPath)
 
