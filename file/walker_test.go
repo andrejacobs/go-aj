@@ -284,6 +284,30 @@ func TestWalkerExcludeFilesAndRegexMiddleware(t *testing.T) {
 	assert.ElementsMatch(t, expected, result)
 }
 
+func TestMatchAppleProtected(t *testing.T) {
+	mw := file.MatchAppleProtected(file.MatchNever)
+
+	match, err := mw("apple", testDirEntry{name: "apple"})
+	require.NoError(t, err)
+	assert.False(t, match)
+
+	match, err = mw(".Spotlight-V100", testDirEntry{name: ".Spotlight-V100"})
+	require.NoError(t, err)
+	assert.True(t, match)
+
+	match, err = mw(".DocumentRevisions-V100", testDirEntry{name: ".DocumentRevisions-V100"})
+	require.NoError(t, err)
+	assert.True(t, match)
+
+	match, err = mw(".Trashes", testDirEntry{name: ".Trashes"})
+	require.NoError(t, err)
+	assert.True(t, match)
+
+	match, err = mw(".fseventsd", testDirEntry{name: ".fseventsd"})
+	require.NoError(t, err)
+	assert.True(t, match)
+}
+
 //-----------------------------------------------------------------------------
 
 func expectedFilepathWalk(path string) ([]string, error) {
@@ -298,4 +322,25 @@ func expectedFilepathWalk(path string) ([]string, error) {
 
 	slices.Sort(expected)
 	return expected, nil
+}
+
+// fs.DirEntry mock
+type testDirEntry struct {
+	name string
+}
+
+func (td testDirEntry) Name() string {
+	return td.name
+}
+
+func (td testDirEntry) IsDir() bool {
+	return false
+}
+
+func (td testDirEntry) Type() fs.FileMode {
+	return 0
+}
+
+func (td testDirEntry) Info() (fs.FileInfo, error) {
+	return nil, nil
 }
